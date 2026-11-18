@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efe4">
+  <meta name="description" content="面向四年级课堂的移项互动演示：拖动方程中的数或未知数跨过等号，观察符号翻转。">
+  <title>等号搬运工 · 移项小实验</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#board">跳到互动区</a>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 12v24"></path>
+            <path d="M15 38h18"></path>
+            <path d="M8 17h32"></path>
+            <path d="M8 17l-4.5 9h9L8 17Z"></path>
+            <path d="M40 17l-4.5 9h9L40 17Z"></path>
+            <path d="M18 12h12"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1>等号搬运工</h1>
+            <span class="brand-tag">移项小实验</span>
+          </div>
+          <p class="brand-sub">拖一拖，让 x 单独留下</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <span class="class-tag">四年级 · 方程</span>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="查看玩法说明" title="玩法说明">
+          <span class="help-glyph" aria-hidden="true">?</span>
+        </button>
+        <button class="icon-btn sound-btn" id="soundBtn" type="button" aria-label="关闭音效" aria-pressed="true" title="音效">
+          <svg class="sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"></path>
+            <path d="M15 9a4.2 4.2 0 0 1 0 6"></path>
+            <path d="M17.8 6.4a8 8 0 0 1 0 11.2"></path>
+          </svg>
+          <svg class="sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"></path>
+            <path d="m16 9 5 6"></path>
+            <path d="m21 9-5 6"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="play-area" aria-label="移项互动区">
+        <div class="mission">
+          <div class="mission-head">
+            <span class="level-pill">第 <strong id="levelNum">1</strong> 关</span>
+            <span class="mission-rule">目标：让 x 单独留在等号一边</span>
+          </div>
+          <h2 id="missionText" aria-live="polite">把 +3 搬到等号右边</h2>
+        </div>
+
+        <div class="board" id="board">
+          <div class="board-head">
+            <div class="board-chip">
+              <span class="drag-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11"></path>
+                  <path d="M11 10V5.5a1.5 1.5 0 0 1 3 0V11"></path>
+                  <path d="M14 10V7a1.5 1.5 0 0 1 3 0v6"></path>
+                  <path d="M8 10.5 6.7 9.2a1.5 1.5 0 0 0-2.2 2l3.7 5.7A6 6 0 0 0 13.4 20H15a5 5 0 0 0 5-5v-2"></path>
+                </svg>
+              </span>
+              <span id="boardChipText">按住数字、系数或 x 拖动</span>
+            </div>
+            <div class="flip-rule" aria-label="跨过等号，运算变反">
+              <span class="rule-pair">
+                <span class="rule-symbol rule-symbol--plus">＋</span>
+                <span class="rule-arrow" aria-hidden="true">↔</span>
+                <span class="rule-symbol rule-symbol--minus">－</span>
+              </span>
+              <span class="rule-divider" aria-hidden="true"></span>
+              <span class="rule-pair">
+                <span class="rule-symbol rule-symbol--times">×</span>
+                <span class="rule-arrow" aria-hidden="true">↔</span>
+                <span class="rule-symbol rule-symbol--divide">÷</span>
+              </span>
+              <span class="rule-text">跨过等号，运算变反</span>
+            </div>
+          </div>
+
+          <div class="equation-wrap">
+            <div class="equation" id="equation" aria-label="方程互动区">
+              <div class="side side--left" id="leftSide" data-side="left" aria-label="等号左边"></div>
+              <div class="equals-wrap" aria-hidden="true">
+                <span class="equals">=</span>
+                <span class="equals-note">变号线</span>
+              </div>
+              <div class="side side--right" id="rightSide" data-side="right" aria-label="等号右边"></div>
+            </div>
+          </div>
+
+          <div class="board-foot" id="boardFoot">
+            <span class="caption-dot" aria-hidden="true"></span>
+            <p class="caption" id="caption" aria-live="polite">拖一拖数字、系数或 x。跨过等号时，运算会变反。</p>
+            <span class="balance-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4v16M7 20h10M4 8h16"></path>
+                <path d="m4 8-2 5h4L4 8ZM20 8l-2 5h4l-2-5Z"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="success-card" id="successCard" hidden aria-live="polite"></div>
+        </div>
+
+        <div class="controls" aria-label="操作按钮">
+          <button class="btn btn--ghost" id="hintBtn" type="button">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6"></path>
+                <path d="M10 21h4"></path>
+                <path d="M8.4 14.3a6 6 0 1 1 7.2 0c-.8.6-1.1 1.1-1.1 2.2h-5c0-1.1-.3-1.6-1.1-2.2Z"></path>
+              </svg>
+            </span>
+            <span>提示</span>
+          </button>
+
+          <button class="btn btn--ghost" id="undoBtn" type="button" disabled>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 7 4 12l5 5"></path>
+                <path d="M4 12h9a6 6 0 0 1 6 6"></path>
+              </svg>
+            </span>
+            <span>撤销</span>
+          </button>
+
+          <button class="btn btn--ghost" id="resetBtn" type="button">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 11a8 8 0 1 0-2.3 5.7"></path>
+                <path d="M20 4v7h-7"></path>
+              </svg>
+            </span>
+            <span>重来</span>
+          </button>
+
+          <span class="controls-spacer" aria-hidden="true"></span>
+
+          <button class="btn btn--primary" id="computeBtn" type="button" disabled>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="3.5" width="16" height="17" rx="3"></rect>
+                <path d="M8 8h8M8 12h2M14 12h2M8 16h2M14 16h2"></path>
+              </svg>
+            </span>
+            <span>算一算</span>
+          </button>
+
+          <button class="btn btn--dark" id="nextBtn" type="button">
+            <span id="nextLabel">下一题</span>
+            <span class="btn-icon btn-icon--end" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M14 7l5 5-5 5"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="学习提示">
+        <section class="panel-card panel-card--steps">
+          <div class="panel-heading">
+            <span class="panel-index">01</span>
+            <h3>怎么搬？</h3>
+          </div>
+          <ol class="steps">
+            <li>
+              <span class="step-num">1</span>
+              <div>
+                <strong>盯住 x</strong>
+                <p>让 x 单独留在等号一边。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <div>
+                <strong>搬数字</strong>
+                <p>按住数字，拖过等号。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <div>
+                <strong>看变号</strong>
+                <p>加变减，减变加。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">4</span>
+              <div>
+                <strong>搬系数</strong>
+                <p>拖走 3x 里的 3，乘变除。</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="panel-card panel-card--mantra">
+          <span class="mantra-kicker">移项口诀</span>
+          <p class="mantra">跨过等号<br><strong>加变减，减变加</strong><br><strong>乘变除，除变乘</strong></p>
+          <div class="sign-demo" aria-label="正三跨过等号变成负三">
+            <span class="pill pill--plus">＋3</span>
+            <span class="demo-arrow" aria-hidden="true">→</span>
+            <span class="pill pill--minus">−3</span>
+          </div>
+          <div class="sign-demo sign-demo--second" aria-label="乘三跨过等号变成除以三">
+            <span class="pill pill--times">×3</span>
+            <span class="demo-arrow" aria-hidden="true">→</span>
+            <span class="pill pill--divide">÷3</span>
+          </div>
+        </section>
+
+        <section class="panel-card panel-card--progress">
+          <div class="progress-head">
+            <h3>闯关进度</h3>
+            <span id="progressText">0 / 6</span>
+          </div>
+          <div class="level-dots" id="levelDots" role="group" aria-label="选择关卡"></div>
+          <p class="progress-note">前 6 关是基础，第 7 关起加入系数和两边都有 x。可自由跳关。</p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>拖动 · 观察 · 变号</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span>每一次搬家，等号两边仍然一样重</span>
+    </footer>
+  </div>
+
+  <dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle">
+    <div class="help-shell">
+      <div class="help-head">
+        <div>
+          <span class="eyebrow">玩法说明</span>
+          <h2 id="helpTitle">把项搬过等号</h2>
+        </div>
+        <button class="icon-btn help-close" id="closeHelpBtn" type="button" aria-label="关闭玩法说明">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="help-grid">
+        <div class="help-step">
+          <span class="help-step-num">1</span>
+          <h3>按住</h3>
+          <p>按住数字、系数，或者 x。</p>
+        </div>
+        <div class="help-step">
+          <span class="help-step-num">2</span>
+          <h3>拖过等号</h3>
+          <p>把它拖到等号的另一边。</p>
+        </div>
+        <div class="help-step">
+          <span class="help-step-num">3</span>
+          <h3>看运算变反</h3>
+          <p>＋3 变 −3，×3 变 ÷3。</p>
+        </div>
+      </div>
+
+      <div class="help-extra">
+        <div class="help-extra-visual" aria-hidden="true">
+          <span class="mini-term mini-term--coef"><b>3</b>x</span>
+          <span class="mini-arrow">→</span>
+          <span class="mini-div">÷3</span>
+        </div>
+        <div>
+          <strong>遇到 3x 怎么办？</strong>
+          <p>拖住 3x 里的金色 3 跨过等号，×3 会变成 ÷3；拖 3x 的 x 部分，则是把整项移项。</p>
+        </div>
+      </div>
+
+      <div class="help-extra">
+        <div class="help-extra-visual" aria-hidden="true">
+          <span class="mini-pill">2x</span>
+          <span class="mini-arrow">→</span>
+          <span class="mini-pill mini-pill--plain">x</span>
+          <span class="mini-arrow">+</span>
+          <span class="mini-pill mini-pill--plain">x</span>
+        </div>
+        <div>
+          <strong>两边都有 x？</strong>
+          <p>先把 x 搬到同一边，再点“算一算”把它们合起来。</p>
+        </div>
+      </div>
+
+      <div class="help-tip">
+        <strong>小提醒：</strong>只有跨过等号，符号或运算才会变反。<br>
+        <strong>为什么？</strong>移项要变号、系数要变除，都是为了让等号两边仍然一样重。
+      </div>
+
+      <div class="help-actions">
+        <button class="btn btn--primary" id="helpStartBtn" type="button">开始试一试</button>
+        <span>也可以点“提示”看下一步。</span>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
