@@ -1,0 +1,6501 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4efe4">
+  <meta name="description" content="面向四年级课堂的移项互动演示：拖动方程中的数或未知数跨过等号，观察符号翻转。">
+  <title>等号搬运工 · 移项小实验</title>
+  <style>
+:root {
+  --bg: #f4efe4;
+  --paper: #fffdf8;
+  --paper-deep: #fbf5e9;
+  --ink: #173b3a;
+  --ink-soft: #506966;
+  --ink-faint: #7b8f8b;
+  --line: #e5dac7;
+  --line-strong: #d8c9b0;
+  --teal: #147d72;
+  --teal-deep: #0c5e57;
+  --teal-soft: #ddf3ec;
+  --mint: #effaf6;
+  --coral: #ed6a4a;
+  --coral-deep: #c94e32;
+  --coral-soft: #ffe6dc;
+  --sun: #f2b640;
+  --sun-soft: #fff0c9;
+  --blue: #2f79a4;
+  --blue-soft: #e1f0f8;
+  --violet: #7258a8;
+  --shadow-sm: 0 4px 14px rgba(41, 61, 55, 0.06);
+  --shadow-md: 0 16px 40px rgba(41, 61, 55, 0.09);
+  --shadow-lg: 0 28px 80px rgba(41, 61, 55, 0.12);
+  --font-ui: "Arial Rounded MT Bold", "Trebuchet MS", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-math: Georgia, "Times New Roman", "Cambria Math", serif;
+  --radius-lg: 30px;
+  --radius-md: 22px;
+  --radius-sm: 14px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 4% 2%, rgba(242, 182, 64, 0.18), transparent 27rem),
+    radial-gradient(circle at 97% 8%, rgba(20, 125, 114, 0.12), transparent 31rem),
+    radial-gradient(circle at 58% 108%, rgba(237, 106, 74, 0.1), transparent 27rem),
+    var(--bg);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.38;
+  background-image: radial-gradient(rgba(80, 105, 102, 0.24) 0.8px, transparent 0.9px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 76%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 76%);
+}
+
+button {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 4px solid rgba(237, 106, 74, 0.38);
+  outline-offset: 4px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  padding: 12px 18px;
+  color: #fff;
+  text-decoration: none;
+  background: var(--teal-deep);
+  border-radius: 999px;
+  transform: translateY(-180%);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1580px;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 22px clamp(18px, 2.8vw, 44px) 14px;
+  margin: 0 auto;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 2px 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 15px;
+}
+
+.brand-mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  color: #fff9ea;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.2), transparent 46%),
+    linear-gradient(145deg, var(--teal), var(--teal-deep));
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 18px;
+  box-shadow:
+    0 8px 0 rgba(12, 94, 87, 0.22),
+    0 16px 30px rgba(12, 94, 87, 0.18);
+  place-items: center;
+  transform: rotate(-2deg);
+}
+
+.brand-mark svg {
+  width: 38px;
+  height: 38px;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.brand-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  color: var(--coral-deep);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: var(--coral-soft);
+  border: 1px solid rgba(237, 106, 74, 0.16);
+  border-radius: 999px;
+  transform: rotate(1deg);
+}
+
+.dev-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  color: #f4ecff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  background: linear-gradient(145deg, #7b62b4, #59428a);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+}
+
+.brand-sub {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 9px;
+}
+
+.class-tag {
+  margin-right: 5px;
+  padding: 7px 12px;
+  color: var(--teal-deep);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: rgba(255, 253, 248, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.icon-btn {
+  display: inline-grid;
+  width: 43px;
+  height: 43px;
+  padding: 0;
+  color: var(--ink);
+  cursor: pointer;
+  background: rgba(255, 253, 248, 0.78);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+  place-items: center;
+}
+
+.icon-btn:hover {
+  background: var(--paper);
+  border-color: var(--line-strong);
+  transform: translateY(-2px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+}
+
+.icon-btn svg {
+  width: 21px;
+  height: 21px;
+}
+
+.help-glyph {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  color: var(--teal-deep);
+  font-size: 0.95rem;
+  font-weight: 800;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  place-items: center;
+}
+
+.sound-btn .sound-off {
+  display: none;
+}
+
+.sound-btn.is-muted .sound-on {
+  display: none;
+}
+
+.sound-btn.is-muted .sound-off {
+  display: block;
+  color: var(--ink-faint);
+}
+
+/* ---------- Layout ---------- */
+
+.layout {
+  display: grid;
+  flex: 1 0 auto;
+  grid-template-columns: minmax(0, 1fr) 302px;
+  gap: 22px;
+  align-items: start;
+}
+
+.play-area {
+  min-width: 0;
+}
+
+.mission {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 73px;
+  padding: 1px 4px 14px;
+}
+
+.mission-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.level-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 5px 11px;
+  color: #fff;
+  font-size: 0.69rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: var(--ink);
+  border-radius: 999px;
+}
+
+.level-pill strong {
+  font-size: 0.86rem;
+}
+
+.mission-rule {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.merge-mode-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  color: #69480c;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: linear-gradient(145deg, #ffe8a7, #f6ce68);
+  border: 1px solid rgba(214, 145, 30, 0.2);
+  border-radius: 999px;
+  transform: rotate(1deg);
+}
+
+.mission h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.15vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+}
+
+.mission h2.mission-equation {
+  font-family: var(--font-math);
+  font-size: clamp(1.65rem, 2.7vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  font-variant-numeric: tabular-nums;
+}
+
+.board {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(345px, 44vh, 440px);
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.54), transparent 24%),
+    radial-gradient(circle at 18% 4%, rgba(242, 182, 64, 0.11), transparent 28%),
+    linear-gradient(145deg, #fffefa 0%, #fdf9ef 100%);
+  border: 1px solid rgba(216, 201, 176, 0.82);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.8) inset,
+    0 22px 55px rgba(41, 61, 55, 0.1),
+    0 3px 10px rgba(41, 61, 55, 0.04);
+}
+
+.board::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.34;
+  background-image: radial-gradient(rgba(80, 105, 102, 0.2) 0.8px, transparent 0.9px);
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 66%);
+  mask-image: linear-gradient(to bottom, #000, transparent 66%);
+}
+
+.board::after {
+  position: absolute;
+  top: 0;
+  right: 8%;
+  left: 8%;
+  height: 4px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(20, 125, 114, 0.2), rgba(237, 106, 74, 0.16), transparent);
+  border-radius: 0 0 999px 999px;
+}
+
+.board-head {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 22px 4px;
+}
+
+.board-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.drag-glyph {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  color: var(--teal);
+  background: var(--teal-soft);
+  border-radius: 9px;
+  place-items: center;
+}
+
+.drag-glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.flip-rule {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px 6px 7px;
+  color: var(--ink-soft);
+  font-size: 0.69rem;
+  font-weight: 600;
+  background: rgba(255, 253, 248, 0.72);
+  border: 1px solid rgba(229, 218, 199, 0.86);
+  border-radius: 999px;
+}
+
+.rule-symbol {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 7px;
+  place-items: center;
+}
+
+.rule-symbol--plus {
+  color: #a96109;
+  background: var(--sun-soft);
+}
+
+.rule-symbol--minus {
+  color: var(--teal-deep);
+  background: var(--teal-soft);
+}
+
+.rule-symbol--times {
+  color: #6a4e9f;
+  background: #eee7fa;
+}
+
+.rule-symbol--divide {
+  color: #286b86;
+  background: var(--blue-soft);
+}
+
+.rule-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.rule-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--line);
+}
+
+.rule-arrow {
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.rule-text {
+  padding: 0 3px;
+}
+
+.equation-wrap {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 218px;
+  padding: 4px clamp(10px, 2.4vw, 34px) 8px;
+}
+
+.equation {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.connector-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.connector-glow {
+  fill: none;
+  stroke: rgba(20, 125, 114, 0.14);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.connector-line {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-dasharray: 9 8;
+  filter: drop-shadow(0 3px 5px rgba(20, 125, 114, 0.16));
+  animation: connectorFlow 1.1s linear infinite;
+}
+
+.connector-line--preview {
+  stroke: var(--coral);
+  stroke-dasharray: 6 7;
+  animation: none;
+}
+
+.connector-dot {
+  fill: var(--coral);
+  stroke: #fffdf8;
+  stroke-width: 3;
+}
+
+.connector-end {
+  fill: var(--teal-deep);
+  stroke: #fffdf8;
+  stroke-width: 2.5;
+}
+
+.side {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 196px;
+  padding: 22px clamp(8px, 1.4vw, 18px);
+  border-radius: 25px;
+  outline: 2px dashed transparent;
+  outline-offset: -11px;
+  transition:
+    background-color 180ms ease,
+    outline-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.side.is-drop-target {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(20, 125, 114, 0.09), transparent 66%),
+    rgba(221, 243, 236, 0.38);
+  outline-color: rgba(20, 125, 114, 0.48);
+  box-shadow: 0 0 0 5px rgba(20, 125, 114, 0.04) inset;
+}
+
+.side.is-drop-target::after {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  max-width: calc(100% - 24px);
+  padding: 5px 11px;
+  overflow: hidden;
+  color: var(--teal-deep);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  content: attr(data-drop-cue);
+  background: rgba(255, 253, 248, 0.92);
+  border: 1px solid rgba(20, 125, 114, 0.18);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+  transform: translateX(-50%);
+  animation: cueIn 180ms ease both;
+}
+
+.side.is-source {
+  background: rgba(237, 106, 74, 0.035);
+}
+
+.side.is-source .term.is-dragging {
+  opacity: 0.17;
+  filter: grayscale(0.2);
+  transform: scale(0.94);
+}
+
+.term-group {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.term-group.is-source-group .operator {
+  opacity: 0.14;
+}
+
+.side .zero {
+  display: grid;
+  width: clamp(62px, 7.4vw, 88px);
+  height: clamp(74px, 8.7vw, 104px);
+  color: var(--ink-faint);
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.34);
+  border: 2px dashed var(--line-strong);
+  border-radius: 20px;
+  place-items: center;
+}
+
+.equals-wrap {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 clamp(5px, 1vw, 15px);
+}
+
+.equals-wrap::before {
+  position: absolute;
+  top: 7%;
+  bottom: 7%;
+  left: 50%;
+  z-index: -1;
+  width: 0;
+  pointer-events: none;
+  content: "";
+  border-left: 2px dashed rgba(20, 125, 114, 0.18);
+}
+
+.equals {
+  color: var(--teal-deep);
+  font-family: var(--font-math);
+  font-size: clamp(4rem, 6.4vw, 6.2rem);
+  font-weight: 700;
+  line-height: 0.7;
+  letter-spacing: -0.08em;
+  text-shadow: 0 3px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  user-select: none;
+}
+
+.equals-note {
+  margin-top: 15px;
+  padding: 3px 8px;
+  color: var(--teal);
+  font-size: 0.59rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  background: rgba(221, 243, 236, 0.72);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ---------- Terms ---------- */
+
+.term-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  transition: transform 170ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.term-wrap:hover {
+  z-index: 5;
+  transform: translateY(-4px) rotate(-0.6deg);
+}
+
+.term-wrap:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.term-wrap.is-dragging {
+  z-index: 1;
+  opacity: 0.17;
+  filter: grayscale(0.2);
+  transform: scale(0.94);
+}
+
+.term-wrap.is-coef-dragging .coef-handle {
+  opacity: 0.14;
+  filter: grayscale(0.35);
+}
+
+.term-wrap.is-coef-dragging .term {
+  border-color: #d8b14b;
+  box-shadow:
+    0 0 0 4px rgba(242, 182, 64, 0.1),
+    0 8px 18px rgba(65, 70, 52, 0.06);
+}
+
+.term {
+  position: relative;
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: clamp(64px, 7.5vw, 94px);
+  height: clamp(78px, 9vw, 112px);
+  padding: 0;
+  color: var(--ink);
+  cursor: grab;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 251, 241, 0.82)),
+    var(--paper);
+  border: 2px solid #e8dcc8;
+  border-bottom-width: 5px;
+  border-radius: 21px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 18px rgba(65, 70, 52, 0.06);
+  transition:
+    transform 170ms cubic-bezier(0.2, 0.8, 0.3, 1),
+    border-color 170ms ease,
+    box-shadow 170ms ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  place-items: center;
+}
+
+.term:hover {
+  z-index: 4;
+  border-color: #d9c6a9;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+    0 15px 26px rgba(65, 70, 52, 0.11);
+}
+
+.term:active {
+  cursor: grabbing;
+}
+
+.term:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.board.is-solved .term,
+.board.is-solved .term:hover,
+.board.is-solved .term-wrap:hover {
+  cursor: default;
+  transform: none;
+}
+
+.board.is-solved .term:hover {
+  border-color: #e8dcc8;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 18px rgba(65, 70, 52, 0.06);
+}
+
+.board.is-solved .term--x:hover {
+  border-color: #b6dfcf;
+}
+
+.board.is-solved .term.is-result:hover {
+  border-color: #9fd4c1;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+    0 20px 38px rgba(20, 125, 114, 0.16);
+}
+
+.term.is-dragging {
+  z-index: 1;
+  cursor: grabbing;
+  opacity: 0.17;
+  transition: opacity 100ms ease, transform 100ms ease;
+  transform: scale(0.94);
+}
+
+.term--x {
+  color: var(--teal-deep);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(150deg, #edfaf5, #d9f2e8);
+  border-color: #b6dfcf;
+  border-bottom-color: #9bd2bf;
+}
+
+.term--x:hover {
+  border-color: #8ec8b4;
+}
+
+.term-value {
+  display: block;
+  padding-bottom: 3px;
+  font-family: var(--font-ui);
+  font-size: clamp(2.45rem, 3.7vw, 3.65rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.term--x .term-value {
+  padding-bottom: 0;
+  font-family: var(--font-math);
+  font-size: clamp(3.1rem, 4.6vw, 4.5rem);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.term--with-coef {
+  width: clamp(102px, 10.9vw, 138px);
+  padding-left: 38%;
+}
+
+.term--with-coef .term-value {
+  transform: translateX(1px);
+}
+
+.coef-handle {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  z-index: 8;
+  display: grid;
+  width: calc(38% - 2px);
+  padding: 0;
+  color: #69480c;
+  font-family: var(--font-ui);
+  font-size: clamp(1.55rem, 2.7vw, 2.15rem);
+  font-weight: 800;
+  line-height: 1;
+  cursor: grab;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 46%),
+    linear-gradient(145deg, #ffe8a7, #f3c24f);
+  border: 0;
+  border-right: 1px dashed rgba(118, 78, 8, 0.24);
+  border-radius: 18px 0 0 18px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    -2px 0 0 rgba(255, 255, 255, 0.28) inset;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  place-items: center;
+}
+
+.coef-handle::after {
+  position: absolute;
+  bottom: 8px;
+  width: 11px;
+  height: 12px;
+  pointer-events: none;
+  content: "";
+  opacity: 0.26;
+  background-image: radial-gradient(circle, currentColor 1.1px, transparent 1.3px);
+  background-size: 4px 4px;
+}
+
+.coef-handle:hover {
+  filter: brightness(1.03) saturate(1.08);
+}
+
+.coef-handle:active {
+  cursor: grabbing;
+}
+
+.coef-handle:disabled {
+  cursor: default;
+}
+
+.coef-times {
+  position: absolute;
+  top: 50%;
+  left: calc(38% - 9px);
+  z-index: 11;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  color: #76530f;
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+  background: #fffaf0;
+  border: 1px solid #e3c26a;
+  border-radius: 50%;
+  box-shadow: 0 2px 5px rgba(118, 83, 15, 0.14);
+  place-items: center;
+  transform: translateY(-50%);
+}
+
+.coef-handle.is-coef-ready {
+  animation: coefReady 1.75s ease-in-out infinite;
+}
+
+.coef-handle.is-hinted {
+  outline: 3px solid var(--coral);
+  outline-offset: 2px;
+  animation: hintPulse 1.15s ease-in-out infinite;
+}
+
+.term-grip {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 13px;
+  height: 17px;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image: radial-gradient(circle, currentColor 1.2px, transparent 1.4px);
+  background-size: 5px 5px;
+}
+
+.term.is-arrived {
+  animation: termArrive 420ms cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+.term.is-result {
+  color: var(--teal-deep);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), transparent 70%),
+    linear-gradient(150deg, #e8faf2, #ccefe2);
+  border-color: #9fd4c1;
+  animation: resultPop 560ms cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+}
+
+.term.is-inviting {
+  animation: inviteFloat 1.7s ease-in-out infinite;
+}
+
+.term.is-inviting::before {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  padding: 3px 9px;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  content: "拖我";
+  background: var(--coral);
+  border-radius: 999px;
+  box-shadow: 0 4px 10px rgba(201, 78, 50, 0.2);
+  transform: translateX(-50%);
+}
+
+.term.is-hinted {
+  border-color: var(--coral);
+  box-shadow:
+    0 0 0 5px rgba(237, 106, 74, 0.13),
+    0 15px 30px rgba(201, 78, 50, 0.14);
+  animation: hintPulse 1.15s ease-in-out infinite;
+}
+
+.term-wrap.is-pair-candidate .term {
+  border-color: var(--coral);
+  border-style: dashed;
+  box-shadow:
+    0 0 0 4px rgba(237, 106, 74, 0.1),
+    0 8px 18px rgba(65, 70, 52, 0.07);
+}
+
+.term-wrap.is-pair-target .term {
+  border-color: var(--teal);
+  border-style: solid;
+  box-shadow:
+    0 0 0 6px rgba(20, 125, 114, 0.16),
+    0 16px 28px rgba(20, 125, 114, 0.16);
+}
+
+.term-wrap.is-pair-invalid .term {
+  border-color: #c84f45;
+  animation: invalidShake 360ms ease;
+}
+
+.term-wrap.is-paired .term {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow:
+    0 0 0 5px rgba(20, 125, 114, 0.11),
+    0 0 0 1px var(--teal) inset,
+    0 16px 30px rgba(20, 125, 114, 0.12);
+}
+
+.term-wrap.is-negative-combo .term {
+  border-color: #c84f45;
+  box-shadow:
+    0 0 0 4px rgba(200, 79, 69, 0.12),
+    0 0 0 1px rgba(200, 79, 69, 0.6) inset,
+    0 12px 24px rgba(200, 79, 69, 0.1);
+}
+
+.term-wrap.is-negative-combo .coef-handle {
+  color: #fffaf0;
+  background: linear-gradient(145deg, #dd7568, #bf443a);
+  border-color: #b03b32;
+  box-shadow:
+    0 0 0 3px rgba(200, 79, 69, 0.13),
+    0 5px 10px rgba(111, 32, 26, 0.16);
+}
+
+.term-negative-badge {
+  position: absolute;
+  top: -9px;
+  right: -8px;
+  z-index: 9;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  color: #fff8ef;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+  background: #c84f45;
+  border: 2px solid #fff9ec;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px rgba(111, 32, 26, 0.2);
+}
+
+.operator {
+  flex: 0 0 auto;
+  width: 0.78em;
+  color: var(--sun);
+  font-family: var(--font-ui);
+  font-size: clamp(1.7rem, 2.9vw, 2.65rem);
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+}
+
+.operator--minus {
+  color: var(--blue);
+}
+
+.operator--plus {
+  color: #d6911e;
+}
+
+.operator.is-flipped {
+  animation: signFlip 360ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.operator--divide {
+  color: var(--violet);
+}
+
+.division-group {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.division-group.is-arrived {
+  animation: divisionArrive 460ms cubic-bezier(0.18, 0.89, 0.32, 1.22) both;
+}
+
+.division-tile {
+  display: grid;
+  width: clamp(54px, 6.2vw, 78px);
+  height: clamp(68px, 7.9vw, 96px);
+  color: #5b4494;
+  font-family: var(--font-ui);
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 800;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), transparent 60%),
+    linear-gradient(150deg, #f4efff, #e7dcff);
+  border: 2px dashed #b7a3dd;
+  border-bottom-width: 5px;
+  border-radius: 19px;
+  box-shadow: 0 8px 18px rgba(94, 70, 146, 0.09);
+  place-items: center;
+}
+
+.paren {
+  flex: 0 0 auto;
+  color: var(--ink-faint);
+  font-family: var(--font-math);
+  font-size: clamp(2rem, 3.3vw, 3rem);
+  line-height: 1;
+}
+
+/* ---------- Board footer ---------- */
+
+.board-foot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 47px;
+  padding: 11px 23px 14px;
+  border-top: 1px dashed rgba(216, 201, 176, 0.72);
+}
+
+.caption-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  background: var(--teal);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(20, 125, 114, 0.1);
+}
+
+.caption {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: clamp(0.75rem, 1vw, 0.84rem);
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.balance-mark {
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  color: var(--teal);
+  opacity: 0.48;
+}
+
+.balance-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- Manual merge ---------- */
+
+.board.is-merging .board-foot {
+  display: none;
+}
+
+.merge-panel {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 16px;
+  align-items: center;
+  padding: 13px 18px;
+  margin: 0 18px 17px;
+  background:
+    radial-gradient(circle at 6% 12%, rgba(242, 182, 64, 0.13), transparent 38%),
+    linear-gradient(145deg, #fffdf8, #f8f1e2);
+  border: 2px solid rgba(20, 125, 114, 0.26);
+  border-radius: 20px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.8) inset,
+    0 14px 30px rgba(41, 61, 55, 0.09);
+  animation: mergePanelIn 320ms cubic-bezier(0.18, 0.89, 0.32, 1.2) both;
+}
+
+.merge-panel.is-negative-merge {
+  background:
+    radial-gradient(circle at 6% 12%, rgba(200, 79, 69, 0.1), transparent 38%),
+    linear-gradient(145deg, #fffaf6, #fbece5);
+  border-color: rgba(200, 79, 69, 0.4);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.8) inset,
+    0 14px 30px rgba(200, 79, 69, 0.08);
+}
+
+.merge-copy {
+  min-width: 0;
+}
+
+.merge-kicker {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--teal);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.merge-formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-family: var(--font-math);
+  font-size: clamp(1.25rem, 1.8vw, 1.7rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.merge-lead {
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: 0.88em;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.merge-input {
+  width: clamp(60px, 5.6vw, 82px);
+  height: clamp(45px, 4.8vw, 58px);
+  padding: 0 6px;
+  color: var(--teal-deep);
+  font-family: var(--font-ui);
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  font-style: normal;
+  font-weight: 800;
+  text-align: center;
+  background: #fffdf8;
+  border: 2px solid #b7a3dd;
+  border-bottom-width: 4px;
+  border-radius: 13px;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(114, 88, 168, 0.07);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.merge-input:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 5px rgba(114, 88, 168, 0.15);
+}
+
+.merge-input.is-error {
+  border-color: var(--coral);
+  box-shadow: 0 0 0 5px rgba(237, 106, 74, 0.16);
+  animation: invalidShake 380ms ease;
+}
+
+.merge-suffix {
+  color: var(--teal-deep);
+  font-family: var(--font-math);
+  font-size: 1.15em;
+  font-style: italic;
+}
+
+.merge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+.btn--compact {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.72rem;
+  border-radius: 12px;
+}
+
+.merge-feedback {
+  grid-column: 1 / -1;
+  min-height: 1.15em;
+  margin: 0;
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.merge-feedback.is-error {
+  color: var(--coral-deep);
+}
+
+/* ---------- Success ---------- */
+
+.success-card {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 86px;
+  padding: 13px 19px;
+  margin: 0 18px 17px;
+  color: #fff9eb;
+  background:
+    radial-gradient(circle at 12% 24%, rgba(255, 255, 255, 0.18), transparent 38%),
+    linear-gradient(110deg, var(--teal-deep), #137a6e 58%, #1a8b79);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 22px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.14) inset,
+    0 16px 34px rgba(12, 94, 87, 0.22);
+  animation: successIn 480ms cubic-bezier(0.18, 0.89, 0.32, 1.2) both;
+}
+
+.success-star {
+  display: grid;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  color: #735013;
+  font-size: 1.6rem;
+  background: linear-gradient(145deg, #ffe8a5, var(--sun));
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 18px;
+  box-shadow: 0 7px 0 rgba(99, 70, 11, 0.18);
+  place-items: center;
+  transform: rotate(-4deg);
+}
+
+.success-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.success-kicker {
+  margin: 0 0 2px;
+  color: rgba(255, 249, 235, 0.72);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.success-answer {
+  font-family: var(--font-math);
+  font-size: clamp(1.8rem, 2.6vw, 2.55rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.success-check {
+  margin: 6px 0 0;
+  color: rgba(255, 249, 235, 0.82);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.success-check strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+.success-rule {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  color: rgba(255, 249, 235, 0.75);
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+}
+
+.success-rule strong {
+  display: block;
+  color: #ffe6a5;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+}
+
+.board.is-solved .board-foot {
+  display: none;
+}
+
+/* ---------- Controls ---------- */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 2px 0;
+}
+
+.controls-spacer {
+  flex: 1 1 16px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 47px;
+  padding: 0 17px;
+  color: var(--ink);
+  font-size: 0.79rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--paper);
+  border-color: var(--line-strong);
+  box-shadow: 0 8px 20px rgba(41, 61, 55, 0.09);
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled,
+.btn.is-locked-next {
+  cursor: not-allowed;
+  opacity: 0.38;
+  box-shadow: none;
+}
+
+.btn.is-locked-next:hover {
+  color: #fffaf0;
+  background: linear-gradient(135deg, #204b48, #123c3a);
+  border-color: rgba(9, 47, 44, 0.8);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-icon {
+  display: grid;
+  width: 19px;
+  height: 19px;
+  place-items: center;
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn--primary {
+  color: #fffaf0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 48%),
+    linear-gradient(135deg, var(--coral), var(--coral-deep));
+  border-color: rgba(169, 55, 31, 0.55);
+  box-shadow:
+    0 4px 0 rgba(159, 53, 31, 0.32),
+    0 12px 24px rgba(201, 78, 50, 0.2);
+}
+
+.btn--primary:hover:not(:disabled) {
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 48%),
+    linear-gradient(135deg, #f27755, #bf452a);
+  border-color: rgba(150, 45, 23, 0.62);
+  box-shadow:
+    0 4px 0 rgba(146, 44, 22, 0.36),
+    0 16px 30px rgba(201, 78, 50, 0.25);
+}
+
+.btn--primary.is-ready {
+  animation: readyPulse 1.9s ease-in-out infinite;
+}
+
+.btn.is-nudged {
+  animation: nudge 420ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.btn--dark {
+  color: #fffaf0;
+  background: linear-gradient(135deg, #204b48, #123c3a);
+  border-color: rgba(9, 47, 44, 0.8);
+  box-shadow:
+    0 4px 0 rgba(7, 43, 40, 0.26),
+    0 12px 24px rgba(18, 60, 58, 0.17);
+}
+
+.btn--dark:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2a5d59, #173f3d);
+  border-color: rgba(7, 43, 40, 0.9);
+}
+
+.btn--dark.is-primary {
+  animation: nextPulse 1.7s ease-in-out infinite;
+}
+
+.btn--ghost {
+  color: var(--ink-soft);
+  background: rgba(255, 253, 248, 0.56);
+  box-shadow: none;
+}
+
+.btn-icon--end {
+  margin-left: 1px;
+}
+
+/* ---------- Side panel ---------- */
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-width: 0;
+  padding-top: 73px;
+}
+
+.panel-card {
+  position: relative;
+  padding: 19px;
+  overflow: hidden;
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid rgba(225, 214, 195, 0.9);
+  border-radius: 24px;
+  box-shadow: 0 12px 28px rgba(41, 61, 55, 0.06);
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.panel-index {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  color: var(--teal-deep);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: var(--teal-soft);
+  border-radius: 9px;
+  place-items: center;
+}
+
+.panel-heading h3,
+.progress-head h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.step-num {
+  display: grid;
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  margin-top: 1px;
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  font-weight: 800;
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.steps strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.steps p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.69rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.panel-card--mantra {
+  color: #fff9ec;
+  background:
+    radial-gradient(circle at 82% 9%, rgba(255, 255, 255, 0.14), transparent 33%),
+    linear-gradient(145deg, #1f5954, #0d403d);
+  border-color: rgba(14, 69, 64, 0.9);
+  box-shadow: 0 18px 36px rgba(12, 62, 58, 0.18);
+}
+
+.panel-card--mantra::after {
+  position: absolute;
+  right: -27px;
+  bottom: -38px;
+  width: 130px;
+  height: 130px;
+  pointer-events: none;
+  content: "=";
+  color: rgba(255, 249, 236, 0.06);
+  font-family: var(--font-math);
+  font-size: 8rem;
+  line-height: 1;
+  transform: rotate(-12deg);
+}
+
+.mantra-kicker {
+  display: inline-block;
+  padding: 4px 8px;
+  color: #ffe4a0;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  background: rgba(255, 228, 160, 0.12);
+  border: 1px solid rgba(255, 228, 160, 0.2);
+  border-radius: 999px;
+}
+
+.mantra {
+  margin: 11px 0 14px;
+  color: rgba(255, 249, 236, 0.7);
+  font-size: 0.74rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.mantra strong {
+  display: inline-block;
+  margin-top: 2px;
+  color: #fff9ec;
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.sign-demo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sign-demo--second {
+  margin-top: 8px;
+}
+
+.pill {
+  display: inline-grid;
+  min-width: 46px;
+  height: 31px;
+  padding: 0 9px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  border-radius: 10px;
+  place-items: center;
+}
+
+.pill--plus {
+  color: #6a480b;
+  background: linear-gradient(145deg, #ffe8a7, #f6c455);
+}
+
+.pill--minus {
+  color: #dffaf4;
+  background: linear-gradient(145deg, #2a8c80, #146c63);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.pill--times {
+  color: #eee8ff;
+  background: linear-gradient(145deg, #7b62b4, #5d478f);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.pill--divide {
+  color: #e4f8ff;
+  background: linear-gradient(145deg, #3a89a8, #23647e);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.demo-arrow {
+  color: rgba(255, 249, 236, 0.55);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.panel-card--progress {
+  padding-bottom: 16px;
+}
+
+.progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.progress-head span {
+  color: var(--teal);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.level-dots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+  gap: 6px;
+}
+
+.level-dot {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  padding: 0;
+  color: var(--ink-soft);
+  font-size: 0.69rem;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition:
+    transform 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease;
+  place-items: center;
+}
+
+.level-dot:hover {
+  border-color: var(--teal);
+  transform: translateY(-2px);
+}
+
+.level-dot.is-current {
+  color: #fffdf8;
+  background: var(--teal);
+  border-color: var(--teal);
+  box-shadow: 0 5px 0 rgba(12, 94, 87, 0.2);
+  transform: translateY(-2px);
+}
+
+.level-dot.is-completed:not(.is-current) {
+  color: var(--teal-deep);
+  background: var(--teal-soft);
+  border-color: #b9e2d4;
+}
+
+.level-dot.is-merge-level:not(.is-current):not(.is-completed) {
+  background: #fff8e7;
+  border-color: #e4c46e;
+}
+
+.level-dot.is-locked {
+  color: var(--ink-faint);
+  cursor: not-allowed;
+  background: rgba(255, 253, 248, 0.45);
+  border-color: #ddd4c5;
+  border-style: dashed;
+  opacity: 0.48;
+}
+
+.level-dot.is-locked:hover {
+  border-color: #ddd4c5;
+  transform: none;
+}
+
+.level-dot.is-completed::after {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  display: grid;
+  width: 13px;
+  height: 13px;
+  color: #fff;
+  font-size: 0.48rem;
+  content: "✓";
+  background: var(--coral);
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.progress-note {
+  margin: 10px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.63rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 17px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.footer-sep {
+  opacity: 0.55;
+}
+
+/* ---------- Drag ghost ---------- */
+
+body.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(64px, 7.5vw, 94px);
+  height: clamp(78px, 9vw, 112px);
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 251, 241, 0.9)),
+    var(--paper);
+  border: 2px solid #d8c5a6;
+  border-bottom-width: 5px;
+  border-radius: 21px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+    0 28px 46px rgba(35, 57, 49, 0.23);
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.drag-ghost[data-kind="x"] {
+  color: var(--teal-deep);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(150deg, #edfaf5, #d9f2e8);
+  border-color: #9fd4c1;
+}
+
+.ghost-value {
+  display: block;
+  padding-bottom: 3px;
+  font-size: clamp(2.45rem, 3.7vw, 3.65rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.drag-ghost[data-kind="x"] .ghost-value {
+  padding-bottom: 0;
+  font-family: var(--font-math);
+  font-size: clamp(3.1rem, 4.6vw, 4.5rem);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.ghost-sign {
+  position: absolute;
+  top: -17px;
+  left: -15px;
+  display: grid;
+  width: 37px;
+  height: 37px;
+  color: #69480c;
+  font-size: 1.3rem;
+  font-weight: 800;
+  background: linear-gradient(145deg, #ffe7a2, #f6c24c);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 6px 14px rgba(105, 72, 12, 0.24);
+  place-items: center;
+}
+
+.ghost-sign.is-minus {
+  color: #e4fbf5;
+  background: linear-gradient(145deg, #2c9185, #126b62);
+  box-shadow: 0 6px 14px rgba(12, 75, 69, 0.28);
+}
+
+.drag-ghost.is-flipping .ghost-sign {
+  animation: ghostFlip 340ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.drag-ghost::after {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  padding: 4px 9px;
+  color: #e9fdf8;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  content: attr(data-note);
+  background: var(--teal-deep);
+  border-radius: 999px;
+  box-shadow: 0 5px 12px rgba(12, 94, 87, 0.22);
+  opacity: 0;
+  transform: translateX(-50%) translateY(-4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.drag-ghost.is-flipping::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.drag-ghost.is-coef-term .ghost-value {
+  padding-bottom: 0;
+  font-family: var(--font-ui);
+  font-size: clamp(1.8rem, 2.8vw, 2.45rem);
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: -0.06em;
+}
+
+.drag-ghost.drag-ghost--coef {
+  display: grid;
+  width: 78px;
+  height: 78px;
+  color: #69480c;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.48), transparent 48%),
+    linear-gradient(145deg, #ffe8a7, #f0bd43);
+  border: 2px solid #dfad36;
+  border-bottom-width: 5px;
+  border-radius: 23px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.6) inset,
+    0 24px 48px rgba(104, 72, 9, 0.25);
+  place-items: center;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.ghost-coef-value {
+  font-family: var(--font-ui);
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ghost-coef-op {
+  position: absolute;
+  top: -11px;
+  left: -11px;
+  display: grid;
+  width: 31px;
+  height: 31px;
+  color: #6a4a0b;
+  font-size: 1.05rem;
+  font-weight: 800;
+  background: #fff8df;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 5px 12px rgba(104, 72, 9, 0.22);
+  place-items: center;
+}
+
+.drag-ghost--coef.is-dividing {
+  color: #ecfdf8;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 48%),
+    linear-gradient(145deg, #38998c, #126b62);
+  border-color: #0f5f57;
+}
+
+.drag-ghost--coef.is-dividing .ghost-coef-value {
+  animation: coefGhostPulse 360ms cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+}
+
+.drag-ghost--coef.is-dividing .ghost-coef-op {
+  color: #0e5e57;
+  background: #dffaf4;
+}
+
+.drag-ghost--coef.is-dividing::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 160;
+  max-width: min(88vw, 480px);
+  padding: 10px 17px;
+  color: #fffdf7;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  background: rgba(23, 59, 58, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  box-shadow: 0 18px 40px rgba(16, 44, 42, 0.25);
+  opacity: 0;
+  transform: translate(-50%, 12px) scale(0.96);
+  transition:
+    opacity 180ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1.1);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.toast.is-flip {
+  background: linear-gradient(135deg, #126d64, #0c514c);
+}
+
+/* ---------- Help dialog ---------- */
+
+.help-dialog {
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(86svh, 680px);
+  padding: 0;
+  overflow-y: auto;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+}
+
+.help-dialog::backdrop {
+  background: rgba(16, 43, 41, 0.46);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+.help-shell {
+  padding: clamp(22px, 4vw, 34px);
+  background:
+    radial-gradient(circle at 90% 8%, rgba(242, 182, 64, 0.13), transparent 28%),
+    var(--paper);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 28px;
+  box-shadow: var(--shadow-lg);
+}
+
+.help-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.eyebrow {
+  color: var(--coral-deep);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.help-head h2 {
+  margin: 7px 0 0;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.help-close {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  font-size: 1.3rem;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 24px 0 16px;
+}
+
+.help-step {
+  padding: 16px;
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.help-step-num {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  margin-bottom: 11px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: var(--teal);
+  border-radius: 9px;
+  place-items: center;
+}
+
+.help-step h3 {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.help-step p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.help-extra {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-top: 9px;
+  background: rgba(255, 253, 248, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.help-extra + .help-extra {
+  margin-top: 8px;
+}
+
+.help-extra-visual {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 154px;
+}
+
+.help-extra strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font-size: 0.77rem;
+  font-weight: 800;
+}
+
+.help-extra p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.69rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.mini-term,
+.mini-pill,
+.mini-div {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 37px;
+  padding: 0 9px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  border-radius: 10px;
+}
+
+.mini-term {
+  gap: 2px;
+  color: var(--teal-deep);
+  background: var(--teal-soft);
+  border: 1px solid #b6dfcf;
+}
+
+.mini-term b {
+  padding: 2px 4px;
+  margin-right: 1px;
+  color: #69480c;
+  font-size: 0.78rem;
+  background: linear-gradient(145deg, #ffe8a7, #f3c24f);
+  border-radius: 6px;
+}
+
+.mini-term i {
+  color: #8d6b1c;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.mini-pill {
+  color: #fff;
+  background: var(--teal);
+  border: 1px solid var(--teal-deep);
+}
+
+.mini-pill--plain {
+  color: var(--teal-deep);
+  background: var(--teal-soft);
+  border-color: #b6dfcf;
+}
+
+.mini-div {
+  color: #5b4494;
+  background: #eee7fa;
+  border: 1px dashed #b7a3dd;
+}
+
+.mini-arrow {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.help-tip {
+  padding: 12px 14px;
+  color: var(--ink-soft);
+  font-size: 0.73rem;
+  font-weight: 500;
+  line-height: 1.55;
+  background: var(--sun-soft);
+  border: 1px solid rgba(214, 145, 30, 0.18);
+  border-radius: 14px;
+}
+
+.help-tip strong {
+  color: #8a5b08;
+}
+
+.help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.help-actions span {
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+/* ---------- Completion dialog ---------- */
+
+.complete-dialog {
+  width: min(520px, calc(100vw - 30px));
+  max-height: 90svh;
+  padding: 0;
+  overflow-y: auto;
+  background: transparent;
+  border: 0;
+}
+
+.complete-dialog::backdrop {
+  background: rgba(16, 43, 41, 0.58);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+.complete-shell {
+  position: relative;
+  padding: 34px clamp(22px, 5vw, 42px) 30px;
+  overflow: hidden;
+  color: #fff9ec;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 217, 120, 0.2), transparent 42%),
+    radial-gradient(circle at 8% 90%, rgba(255, 255, 255, 0.08), transparent 36%),
+    linear-gradient(150deg, #1e5b55, #0d403d 72%);
+  border: 2px solid rgba(255, 221, 137, 0.48);
+  border-radius: 30px;
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.12) inset,
+    0 40px 100px rgba(8, 39, 36, 0.36);
+  animation: completePop 520ms cubic-bezier(0.18, 0.89, 0.32, 1.2) both;
+}
+
+.complete-shell::before,
+.complete-shell::after {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  pointer-events: none;
+  content: "";
+  border: 1px solid rgba(255, 236, 180, 0.12);
+  border-radius: 50%;
+}
+
+.complete-shell::before {
+  top: -82px;
+  left: -55px;
+}
+
+.complete-shell::after {
+  right: -65px;
+  bottom: -95px;
+}
+
+.complete-spark {
+  position: absolute;
+  color: #ffe08a;
+  font-size: 1.25rem;
+  opacity: 0.8;
+  animation: completeSpark 2.2s ease-in-out infinite;
+}
+
+.complete-spark--one {
+  top: 28px;
+  left: 46px;
+}
+
+.complete-spark--two {
+  top: 78px;
+  right: 54px;
+  font-size: 0.85rem;
+  animation-delay: 0.5s;
+}
+
+.complete-crown {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 13px;
+  color: #705015;
+  font-size: 2rem;
+  background: linear-gradient(145deg, #ffe8a3, #f2b640);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 23px;
+  box-shadow:
+    0 8px 0 rgba(99, 70, 11, 0.2),
+    0 18px 38px rgba(7, 34, 31, 0.24);
+  place-items: center;
+  transform: rotate(-5deg);
+}
+
+.complete-shell .eyebrow {
+  color: #ffe19a;
+}
+
+.complete-shell h2 {
+  margin: 8px 0 8px;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  text-shadow: 0 3px 0 rgba(7, 34, 31, 0.18);
+}
+
+.complete-text {
+  max-width: 360px;
+  margin: 0 auto 18px;
+  color: rgba(255, 249, 236, 0.76);
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.complete-medal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  margin-bottom: 22px;
+  color: #ffe6a5;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 225, 154, 0.25);
+  border-radius: 999px;
+}
+
+.complete-medal span {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.complete-medal strong {
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.complete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+}
+
+.complete-actions .btn--ghost {
+  color: rgba(255, 249, 236, 0.82);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- Confetti ---------- */
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 11px;
+  background: var(--coral);
+  border-radius: 2px;
+  opacity: 0;
+  animation: confettiBurst var(--duration, 1.4s) cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes cueIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes termArrive {
+  0% { opacity: 0; transform: translateY(-22px) scale(0.72) rotate(-3deg); }
+  65% { opacity: 1; transform: translateY(3px) scale(1.04) rotate(0.5deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes resultPop {
+  0% { opacity: 0; transform: scale(0.6) rotate(-4deg); }
+  55% { opacity: 1; transform: scale(1.08) rotate(1deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes signFlip {
+  0% { opacity: 0; transform: rotateX(0deg) scale(0.7); }
+  45% { opacity: 1; transform: rotateX(90deg) scale(1.15); }
+  100% { opacity: 1; transform: rotateX(0deg) scale(1); }
+}
+
+@keyframes ghostFlip {
+  0% { transform: rotateY(0deg) scale(0.85); }
+  50% { transform: rotateY(90deg) scale(1.1); }
+  100% { transform: rotateY(0deg) scale(1); }
+}
+
+@keyframes completePop {
+  0% { opacity: 0; transform: translateY(24px) scale(0.92); }
+  65% { opacity: 1; transform: translateY(-3px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes completeSpark {
+  0%, 100% { opacity: 0.45; transform: translateY(0) scale(0.9) rotate(0deg); }
+  50% { opacity: 1; transform: translateY(-7px) scale(1.12) rotate(18deg); }
+}
+
+@keyframes successIn {
+  0% { opacity: 0; transform: translateY(16px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes inviteFloat {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(237, 106, 74, 0.12), 0 8px 18px rgba(65, 70, 52, 0.06); transform: translateY(0); }
+  50% { box-shadow: 0 0 0 7px rgba(237, 106, 74, 0.08), 0 16px 30px rgba(65, 70, 52, 0.11); transform: translateY(-4px); }
+}
+
+@keyframes hintPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.03); }
+}
+
+@keyframes connectorFlow {
+  to { stroke-dashoffset: -34; }
+}
+
+@keyframes mergePanelIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.985); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes invalidShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes coefReady {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 0 0 0 rgba(242, 182, 64, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.55) inset,
+      0 0 0 6px rgba(242, 182, 64, 0.16),
+      0 8px 18px rgba(104, 72, 9, 0.14);
+  }
+}
+
+@keyframes coefGhostPulse {
+  0% { transform: scale(0.86) rotate(-5deg); }
+  55% { transform: scale(1.1) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes divisionArrive {
+  0% { opacity: 0; transform: translateY(-16px) scale(0.78) rotate(2deg); }
+  65% { opacity: 1; transform: translateY(2px) scale(1.04) rotate(0deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+
+@keyframes readyPulse {
+  0%, 100% { box-shadow: 0 4px 0 rgba(159, 53, 31, 0.32), 0 12px 24px rgba(201, 78, 50, 0.2); }
+  50% { box-shadow: 0 4px 0 rgba(159, 53, 31, 0.32), 0 0 0 7px rgba(237, 106, 74, 0.12), 0 16px 32px rgba(201, 78, 50, 0.28); }
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes nextPulse {
+  0%, 100% { box-shadow: 0 4px 0 rgba(7, 43, 40, 0.26), 0 12px 24px rgba(18, 60, 58, 0.17); }
+  50% { box-shadow: 0 4px 0 rgba(7, 43, 40, 0.26), 0 0 0 7px rgba(20, 125, 114, 0.12), 0 16px 32px rgba(18, 60, 58, 0.24); }
+}
+
+@keyframes confettiBurst {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot)) scale(0.75);
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (min-width: 1500px) {
+  .coef-handle {
+    font-size: 2.4rem;
+  }
+
+  .division-tile {
+    width: 82px;
+    height: 98px;
+    font-size: 2.5rem;
+  }
+
+  .app {
+    max-width: 1760px;
+    padding-top: 28px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 326px;
+    gap: 26px;
+  }
+
+  .side-panel {
+    gap: 16px;
+    padding-top: 81px;
+  }
+
+  .mission {
+    min-height: 84px;
+  }
+
+  .mission h2 {
+    font-size: 2rem;
+  }
+
+  .board {
+    min-height: 500px;
+  }
+
+  .equation-wrap {
+    min-height: 280px;
+  }
+
+  .side {
+    min-height: 258px;
+  }
+
+  .term {
+    width: 112px;
+    height: 132px;
+    border-radius: 25px;
+  }
+
+  .term-value {
+    font-size: 4.3rem;
+  }
+
+  .term--x .term-value {
+    font-size: 5.4rem;
+  }
+
+  .term--with-coef {
+    width: 160px;
+  }
+
+  .operator {
+    width: 0.84em;
+    font-size: 3rem;
+  }
+
+  .equals {
+    font-size: 7rem;
+  }
+
+  .equals-note {
+    font-size: 0.66rem;
+  }
+
+  .board-head {
+    padding: 22px 28px 5px;
+  }
+
+  .board-foot {
+    min-height: 54px;
+    padding: 13px 28px 17px;
+  }
+
+  .caption {
+    font-size: 0.9rem;
+  }
+
+  .panel-card {
+    padding: 21px;
+  }
+}
+
+@media (min-width: 1500px) and (min-height: 1000px) {
+  .board {
+    min-height: 600px;
+  }
+
+  .equation-wrap {
+    min-height: 350px;
+  }
+
+  .side {
+    min-height: 322px;
+  }
+
+  .term {
+    width: 132px;
+    height: 154px;
+    border-radius: 28px;
+  }
+
+  .term--with-coef {
+    width: 188px;
+  }
+
+  .coef-handle {
+    font-size: 2.9rem;
+  }
+
+  .term-value {
+    font-size: 5rem;
+  }
+
+  .term--x .term-value {
+    font-size: 6.2rem;
+  }
+
+  .operator {
+    width: 0.84em;
+    font-size: 3.6rem;
+  }
+
+  .equals {
+    font-size: 8rem;
+  }
+
+  .board-head {
+    padding: 25px 32px 6px;
+  }
+
+  .board-foot {
+    min-height: 60px;
+    padding: 15px 32px 18px;
+  }
+
+  .success-card {
+    min-height: 104px;
+  }
+
+  .success-star {
+    width: 60px;
+    height: 60px;
+  }
+
+  .success-answer {
+    font-size: 2.9rem;
+  }
+}
+
+@media (max-width: 1180px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 18px;
+  }
+
+  .side-panel {
+    padding-top: 73px;
+  }
+
+  .panel-card {
+    padding: 16px;
+  }
+
+  .class-tag {
+    display: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .app {
+    padding-inline: 18px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side-panel {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    padding-top: 0;
+  }
+
+  .panel-card--progress {
+    grid-column: 1 / -1;
+  }
+
+  .level-dots {
+    grid-template-columns: repeat(auto-fit, 52px);
+    justify-content: start;
+  }
+
+  .level-dot {
+    aspect-ratio: auto;
+    height: 38px;
+  }
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 15px 12px 10px;
+  }
+
+  .topbar {
+    gap: 10px;
+    padding-bottom: 12px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 45px;
+    height: 45px;
+    border-radius: 14px;
+  }
+
+  .brand-mark svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .brand h1 {
+    font-size: 1.24rem;
+  }
+
+  .brand-tag {
+    display: none;
+  }
+
+  .brand-sub {
+    margin-top: 3px;
+    font-size: 0.67rem;
+  }
+
+  .top-actions {
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+  }
+
+  .mission {
+    min-height: 0;
+    padding-bottom: 12px;
+  }
+
+  .mission-rule {
+    font-size: 0.68rem;
+  }
+
+  .mission h2 {
+    font-size: 1.2rem;
+  }
+
+  .board {
+    min-height: 330px;
+    border-radius: 24px;
+  }
+
+  .board-head {
+    flex-wrap: wrap;
+    padding: 14px 14px 0;
+  }
+
+  .board-chip {
+    font-size: 0.66rem;
+  }
+
+  .flip-rule {
+    padding-right: 7px;
+  }
+
+  .rule-text {
+    display: none;
+  }
+
+  .equation-wrap {
+    min-height: 190px;
+    padding: 0 4px 4px;
+  }
+
+  .side {
+    min-height: 174px;
+    padding: 18px 3px;
+    gap: 4px;
+  }
+
+  .equals {
+    font-size: clamp(2.6rem, 11vw, 4.5rem);
+  }
+
+  .equals-note {
+    margin-top: 11px;
+    padding: 3px 6px;
+    font-size: 0.5rem;
+  }
+
+  .term {
+    width: clamp(54px, 16vw, 74px);
+    height: clamp(68px, 20vw, 92px);
+    border-radius: 17px;
+  }
+
+  .term--with-coef {
+    width: 112px;
+    padding-left: 42%;
+  }
+
+  .term-value {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+
+  .term--x .term-value {
+    font-size: clamp(2.5rem, 10vw, 3.4rem);
+  }
+
+  .coef-handle {
+    width: calc(42% - 2px);
+    font-size: clamp(1.3rem, 5vw, 1.75rem);
+    border-radius: 14px 0 0 14px;
+  }
+
+  .operator {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+  }
+
+  .operator--divide {
+    font-size: clamp(1.35rem, 4.6vw, 1.8rem);
+  }
+
+  .division-tile {
+    width: 52px;
+    height: 66px;
+    font-size: 1.7rem;
+    border-radius: 15px;
+  }
+
+  .side .zero {
+    width: 54px;
+    height: 68px;
+  }
+
+  .board-foot {
+    padding: 9px 14px 12px;
+  }
+
+  .caption {
+    font-size: 0.68rem;
+  }
+
+  .merge-mode-tag {
+    padding: 4px 8px;
+    font-size: 0.58rem;
+  }
+
+  .merge-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    padding: 12px 13px;
+    margin: 0 11px 12px;
+    border-radius: 18px;
+  }
+
+  .merge-kicker {
+    margin-bottom: 4px;
+    font-size: 0.57rem;
+  }
+
+  .merge-formula {
+    gap: 5px;
+    font-size: 1.2rem;
+  }
+
+  .merge-input {
+    width: 62px;
+    height: 46px;
+    font-size: 1.45rem;
+    border-radius: 11px;
+  }
+
+  .merge-actions {
+    justify-content: flex-start;
+  }
+
+  .merge-feedback {
+    font-size: 0.64rem;
+  }
+
+  .success-card {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 0 11px 12px;
+    border-radius: 18px;
+  }
+
+  .success-star {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    font-size: 1.3rem;
+  }
+
+  .success-rule {
+    display: none;
+  }
+
+  .success-check {
+    font-size: 0.66rem;
+  }
+
+  .controls {
+    gap: 6px;
+    padding-top: 10px;
+  }
+
+  .btn {
+    min-height: 43px;
+    padding: 0 12px;
+    font-size: 0.72rem;
+    border-radius: 13px;
+  }
+
+  .controls-spacer {
+    display: none;
+  }
+
+  #computeBtn,
+  #nextBtn {
+    flex: 1 1 auto;
+  }
+
+  .side-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .panel-card--steps {
+    display: none;
+  }
+
+  .panel-card--progress {
+    grid-column: auto;
+  }
+
+  .level-dots {
+    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+  }
+
+  .footer {
+    padding-top: 13px;
+    font-size: 0.58rem;
+  }
+
+  .footer span:last-child,
+  .footer-sep {
+    display: none;
+  }
+
+  .help-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .help-dialog {
+    max-height: 90svh;
+    overflow-y: auto;
+  }
+
+  .complete-shell {
+    padding: 28px 20px 24px;
+    border-radius: 24px;
+  }
+
+  .complete-crown {
+    width: 60px;
+    height: 60px;
+    border-radius: 19px;
+    font-size: 1.65rem;
+  }
+
+  .complete-shell h2 {
+    font-size: 2.1rem;
+  }
+
+  .complete-text {
+    font-size: 0.75rem;
+  }
+
+  .help-extra {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .help-extra-visual {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .help-step {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    column-gap: 10px;
+    align-items: start;
+    padding: 12px;
+  }
+
+  .help-step-num {
+    grid-row: span 2;
+    margin: 0;
+  }
+
+  .help-step h3 {
+    align-self: end;
+    margin: 0;
+  }
+
+  .help-step p {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-sub {
+    display: none;
+  }
+
+  .mission-head {
+    gap: 7px;
+  }
+
+  .mission-rule {
+    display: none;
+  }
+
+  .btn-icon {
+    display: none;
+  }
+
+  .btn {
+    padding-inline: 10px;
+  }
+
+  .success-answer {
+    font-size: 1.55rem;
+  }
+}
+
+@media (max-height: 960px) and (min-width: 961px) {
+  .panel-card--steps {
+    display: none;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 961px) {
+  .app {
+    padding-top: 15px;
+  }
+
+  .topbar {
+    padding-bottom: 10px;
+  }
+
+  .brand-mark {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mission {
+    min-height: 62px;
+    padding-bottom: 10px;
+  }
+
+  .board {
+    min-height: 330px;
+  }
+
+  .equation-wrap {
+    min-height: 190px;
+  }
+
+  .side {
+    min-height: 176px;
+  }
+
+  .side-panel {
+    padding-top: 61px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .confetti {
+    display: none;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#board">跳到互动区</a>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 12v24"></path>
+            <path d="M15 38h18"></path>
+            <path d="M8 17h32"></path>
+            <path d="M8 17l-4.5 9h9L8 17Z"></path>
+            <path d="M40 17l-4.5 9h9L40 17Z"></path>
+            <path d="M18 12h12"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1 id="brandTitle">等号搬运工</h1>
+            <span class="brand-tag">移项小实验</span>
+            <span class="dev-badge" id="devBadge" hidden>DEV</span>
+          </div>
+          <p class="brand-sub">拖一拖，让 x 单独留下</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <span class="class-tag">四年级 · 方程</span>
+        <button class="icon-btn" id="helpBtn" type="button" aria-label="查看玩法说明" title="玩法说明">
+          <span class="help-glyph" aria-hidden="true">?</span>
+        </button>
+        <button class="icon-btn sound-btn" id="soundBtn" type="button" aria-label="关闭音效" aria-pressed="true" title="音效">
+          <svg class="sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"></path>
+            <path d="M15 9a4.2 4.2 0 0 1 0 6"></path>
+            <path d="M17.8 6.4a8 8 0 0 1 0 11.2"></path>
+          </svg>
+          <svg class="sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6.5 8.5H3v7h3.5L11 19V5Z"></path>
+            <path d="m16 9 5 6"></path>
+            <path d="m21 9-5 6"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="play-area" aria-label="移项互动区">
+        <div class="mission">
+          <div class="mission-head">
+            <span class="level-pill">第 <strong id="levelNum">1</strong> 关</span>
+            <span class="mission-rule">目标：让 x 单独留在等号一边</span>
+            <span class="merge-mode-tag" id="mergeModeTag" hidden>配对合并</span>
+          </div>
+          <h2 id="missionText" class="mission-equation" aria-live="polite">x + 5 = 12</h2>
+        </div>
+
+        <div class="board" id="board">
+          <div class="board-head">
+            <div class="board-chip">
+              <span class="drag-glyph" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 11V6.5a1.5 1.5 0 0 1 3 0V11"></path>
+                  <path d="M11 10V5.5a1.5 1.5 0 0 1 3 0V11"></path>
+                  <path d="M14 10V7a1.5 1.5 0 0 1 3 0v6"></path>
+                  <path d="M8 10.5 6.7 9.2a1.5 1.5 0 0 0-2.2 2l3.7 5.7A6 6 0 0 0 13.4 20H15a5 5 0 0 0 5-5v-2"></path>
+                </svg>
+              </span>
+              <span id="boardChipText">按住数字、3x 里的 3，或 x 拖动</span>
+            </div>
+            <div class="flip-rule" aria-label="跨过等号，运算变反">
+              <span class="rule-pair">
+                <span class="rule-symbol rule-symbol--plus">＋</span>
+                <span class="rule-arrow" aria-hidden="true">↔</span>
+                <span class="rule-symbol rule-symbol--minus">－</span>
+              </span>
+              <span class="rule-divider" aria-hidden="true"></span>
+              <span class="rule-pair">
+                <span class="rule-symbol rule-symbol--times">×</span>
+                <span class="rule-arrow" aria-hidden="true">↔</span>
+                <span class="rule-symbol rule-symbol--divide">÷</span>
+              </span>
+              <span class="rule-text">跨过等号，运算变反</span>
+            </div>
+          </div>
+
+          <div class="equation-wrap">
+            <svg class="connector-layer" id="connectorLayer" aria-hidden="true"></svg>
+            <div class="equation" id="equation" aria-label="方程互动区">
+              <div class="side side--left" id="leftSide" data-side="left" aria-label="等号左边"></div>
+              <div class="equals-wrap" aria-hidden="true">
+                <span class="equals">=</span>
+                <span class="equals-note">变号线</span>
+              </div>
+              <div class="side side--right" id="rightSide" data-side="right" aria-label="等号右边"></div>
+            </div>
+          </div>
+
+          <div class="merge-panel" id="mergePanel" hidden role="group" aria-label="合并同类项">
+            <div class="merge-copy">
+              <span class="merge-kicker" id="mergeKicker">配对成功</span>
+              <div class="merge-formula">
+                <span class="merge-lead">合并后是</span>
+                <input
+                  class="merge-input"
+                  id="mergeInput"
+                  type="text"
+                  inputmode="numeric"
+                  pattern="-?[0-9]*"
+                  autocomplete="off"
+                  spellcheck="false"
+                  aria-label="合并后的 x 前面的数"
+                  placeholder="?"
+                  enterkeyhint="done"
+                >
+                <span class="merge-suffix" id="mergeSuffix">x</span>
+              </div>
+            </div>
+            <div class="merge-actions">
+              <button class="btn btn--primary btn--compact" id="mergeConfirmBtn" type="button">合并</button>
+              <button class="btn btn--ghost btn--compact" id="mergeCancelBtn" type="button">取消</button>
+            </div>
+            <p class="merge-feedback" id="mergeFeedback" aria-live="polite"></p>
+          </div>
+
+          <div class="board-foot" id="boardFoot">
+            <span class="caption-dot" aria-hidden="true"></span>
+            <p class="caption" id="caption" aria-live="polite">拖动方程中的项，观察等号两边怎样变化。</p>
+            <span class="balance-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4v16M7 20h10M4 8h16"></path>
+                <path d="m4 8-2 5h4L4 8ZM20 8l-2 5h4l-2-5Z"></path>
+              </svg>
+            </span>
+          </div>
+
+          <div class="success-card" id="successCard" hidden aria-live="polite"></div>
+        </div>
+
+        <div class="controls" aria-label="操作按钮">
+          <button class="btn btn--ghost" id="hintBtn" type="button">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18h6"></path>
+                <path d="M10 21h4"></path>
+                <path d="M8.4 14.3a6 6 0 1 1 7.2 0c-.8.6-1.1 1.1-1.1 2.2h-5c0-1.1-.3-1.6-1.1-2.2Z"></path>
+              </svg>
+            </span>
+            <span>提示</span>
+          </button>
+
+          <button class="btn btn--ghost" id="undoBtn" type="button" disabled>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 7 4 12l5 5"></path>
+                <path d="M4 12h9a6 6 0 0 1 6 6"></path>
+              </svg>
+            </span>
+            <span>撤销</span>
+          </button>
+
+          <button class="btn btn--ghost" id="resetBtn" type="button">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 11a8 8 0 1 0-2.3 5.7"></path>
+                <path d="M20 4v7h-7"></path>
+              </svg>
+            </span>
+            <span>重来</span>
+          </button>
+
+          <span class="controls-spacer" aria-hidden="true"></span>
+
+          <button class="btn btn--primary" id="computeBtn" type="button" disabled>
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="3.5" width="16" height="17" rx="3"></rect>
+                <path d="M8 8h8M8 12h2M14 12h2M8 16h2M14 16h2"></path>
+              </svg>
+            </span>
+            <span>算一算</span>
+          </button>
+
+          <button class="btn btn--dark" id="nextBtn" type="button">
+            <span id="nextLabel">下一题</span>
+            <span class="btn-icon btn-icon--end" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M14 7l5 5-5 5"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <aside class="side-panel" aria-label="学习提示">
+        <section class="panel-card panel-card--steps">
+          <div class="panel-heading">
+            <span class="panel-index">01</span>
+            <h3>怎么搬？</h3>
+          </div>
+          <ol class="steps">
+            <li>
+              <span class="step-num">1</span>
+              <div>
+                <strong>盯住 x</strong>
+                <p>让 x 单独留在等号一边。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <div>
+                <strong>搬数字</strong>
+                <p>按住数字，拖过等号。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <div>
+                <strong>看变号</strong>
+                <p>加变减，减变加。</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">4</span>
+              <div>
+                <strong>搬 3x 里的 3</strong>
+                <p>拖走 3x 里的 3，乘变除。</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="panel-card panel-card--mantra">
+          <span class="mantra-kicker">移项口诀</span>
+          <p class="mantra">跨过等号<br><strong>加变减，减变加</strong><br><strong>乘变除，除变乘</strong></p>
+          <div class="sign-demo" aria-label="正三跨过等号变成负三">
+            <span class="pill pill--plus">＋3</span>
+            <span class="demo-arrow" aria-hidden="true">→</span>
+            <span class="pill pill--minus">−3</span>
+          </div>
+          <div class="sign-demo sign-demo--second" aria-label="乘三跨过等号变成除以三">
+            <span class="pill pill--times">×3</span>
+            <span class="demo-arrow" aria-hidden="true">→</span>
+            <span class="pill pill--divide">÷3</span>
+          </div>
+        </section>
+
+        <section class="panel-card panel-card--progress">
+          <div class="progress-head">
+            <h3>闯关进度</h3>
+            <span id="progressText">0 / 22</span>
+          </div>
+          <div class="level-dots" id="levelDots" role="group" aria-label="选择关卡"></div>
+          <p class="progress-note">按难度排序，完成当前关才会解锁下一关。</p>
+        </section>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>拖动 · 观察 · 变号</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span>每一次搬家，等号两边仍然一样重</span>
+    </footer>
+  </div>
+
+  <dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle">
+    <div class="help-shell">
+      <div class="help-head">
+        <div>
+          <span class="eyebrow">玩法说明</span>
+          <h2 id="helpTitle">把项搬过等号</h2>
+        </div>
+        <button class="icon-btn help-close" id="closeHelpBtn" type="button" aria-label="关闭玩法说明">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="help-grid">
+        <div class="help-step">
+          <span class="help-step-num">1</span>
+          <h3>按住</h3>
+          <p>按住数字、3x 里的 3，或者 x。</p>
+        </div>
+        <div class="help-step">
+          <span class="help-step-num">2</span>
+          <h3>拖过等号</h3>
+          <p>把它拖到等号的另一边。</p>
+        </div>
+        <div class="help-step">
+          <span class="help-step-num">3</span>
+          <h3>看运算变反</h3>
+          <p>＋3 变 −3，×3 变 ÷3。</p>
+        </div>
+      </div>
+
+      <div class="help-extra">
+        <div class="help-extra-visual" aria-hidden="true">
+          <span class="mini-term mini-term--coef"><b>3</b><i>×</i>x</span>
+          <span class="mini-arrow">→</span>
+          <span class="mini-div">÷3</span>
+        </div>
+        <div>
+          <strong>遇到 3x 怎么办？</strong>
+          <p>3x 就是 3 乘 x。拖住 3x 里的金色 3 跨过等号，×3 会变成 ÷3；拖 x 部分，则是把整项移项。</p>
+        </div>
+      </div>
+
+      <div class="help-extra">
+        <div class="help-extra-visual" aria-hidden="true">
+          <span class="mini-pill">2x</span>
+          <span class="mini-arrow">→</span>
+          <span class="mini-pill mini-pill--plain">x</span>
+          <span class="mini-arrow">+</span>
+          <span class="mini-pill mini-pill--plain">x</span>
+        </div>
+        <div>
+          <strong>两边都有 x？</strong>
+          <p>先把 x 搬到同一边，再把两个 x 项拖到一起配对合并。</p>
+        </div>
+      </div>
+
+      <div class="help-extra">
+        <div class="help-extra-visual" aria-hidden="true">
+          <span class="mini-pill mini-pill--plain">3x</span>
+          <span class="mini-arrow">↔</span>
+          <span class="mini-pill mini-pill--plain">−x</span>
+          <span class="mini-arrow">→</span>
+          <span class="mini-pill mini-pill--plain">?x</span>
+        </div>
+        <div>
+          <strong>配对合并</strong>
+          <p>把一个 x 项拖到另一个 x 项上，出现连线后，直接输入合并后是几 x。数字不用配对。</p>
+        </div>
+      </div>
+
+      <div class="help-tip">
+        <strong>小提醒：</strong>只有跨过等号，符号或运算才会变反。<br>
+        <strong>为什么？</strong>移项要变号、3x 里的 3 要变除，都是为了让等号两边仍然一样重。
+      </div>
+
+      <div class="help-actions">
+        <button class="btn btn--primary" id="helpStartBtn" type="button">开始试一试</button>
+        <span>也可以点“提示”看下一步。</span>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="complete-dialog" id="completeDialog" aria-labelledby="completeTitle">
+    <div class="complete-shell">
+      <span class="complete-spark complete-spark--one" aria-hidden="true">✦</span>
+      <span class="complete-spark complete-spark--two" aria-hidden="true">✦</span>
+      <div class="complete-crown" aria-hidden="true">★</div>
+      <span class="eyebrow">全部通关</span>
+      <h2 id="completeTitle">解方程之王</h2>
+      <p class="complete-text" id="completeText">你完成了全部关卡，获得了“解方程之王”称号！</p>
+      <div class="complete-medal" aria-hidden="true">
+        <span>解方程</span>
+        <strong>之王</strong>
+      </div>
+      <div class="complete-actions">
+        <button class="btn btn--primary" id="completeRestartBtn" type="button">回到第 1 关</button>
+        <button class="btn btn--ghost" id="completeCloseBtn" type="button">关闭</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <script>
+(function () {
+  "use strict";
+
+  const LEVELS = [
+    { equation: "x + 5 = 12", note: "基础 · 加号搬家" },
+    { equation: "x + 3 = 8", note: "基础 · 加号搬家" },
+    { equation: "x - 2 = 5", note: "基础 · 减号搬家" },
+    { equation: "12 - x = 5", note: "基础 · x 是减数" },
+    { equation: "5x = 35", note: "3x 里的 3 · 乘变除" },
+    { equation: "3x = 12", note: "3x 里的 3 · 乘变除" },
+    { equation: "4x + 2 = 18", note: "3x 里的 3 · 先搬常数" },
+    { equation: "2x - 7 = 3", note: "3x 里的 3 · 减号搬家" },
+    {
+      equation: "3x + 2 × 4 = 14",
+      note: "3x 里的 3 · 先算 2×4",
+      preface: "先算 2 × 4 = 8"
+    },
+    { equation: "5x + 13 = 33", note: "3x 里的 3 · 大一点的数" },
+    { equation: "7x - 2x = 35", note: "同边合并 · 两个 x" , manualCombine: true },
+    { equation: "9x - 5 - 4x = 95", note: "同边合并 · 再搬常数", manualCombine: true },
+    { equation: "5x + 2 + 7x = 31 + 7", note: "同边合并 · 两边都有数字", manualCombine: true },
+    { equation: "2x = x + 4", note: "两边 · 配对合并", manualCombine: true },
+    { equation: "6x + 24 = 10x", note: "两边 · 先搬 x", manualCombine: true },
+    { equation: "3x + 2 = x + 8", note: "两边 · 配对后除以 3x 里的 3", manualCombine: true },
+    { equation: "5x + 4 = 2x + 16", note: "两边 · 数字大一点", manualCombine: true },
+    { equation: "4x - 6 = 8x - 18", note: "两边 · 两边都有数字", manualCombine: true },
+    { equation: "49 - 2x = 5x", note: "挑战 · x 是减数", manualCombine: true },
+    { equation: "36 + 2x = 48 - 4x", note: "挑战 · 右边有负 x", manualCombine: true },
+    { equation: "22 - 7x = 5x - 14", note: "挑战 · 两边都有常数", manualCombine: true },
+    { equation: "6x + 16 = 31 - 9x", note: "挑战 · 前面的数比较大", manualCombine: true }
+  ];
+
+  const $ = (id) => document.getElementById(id);
+
+  const el = {
+    brandTitle: $("brandTitle"),
+    devBadge: $("devBadge"),
+    board: $("board"),
+    boardChipText: $("boardChipText"),
+    levelNum: $("levelNum"),
+    missionText: $("missionText"),
+    leftSide: $("leftSide"),
+    rightSide: $("rightSide"),
+    equation: $("equation"),
+    caption: $("caption"),
+    connectorLayer: $("connectorLayer"),
+    mergeModeTag: $("mergeModeTag"),
+    mergePanel: $("mergePanel"),
+    mergeKicker: $("mergeKicker"),
+    mergeInput: $("mergeInput"),
+    mergeSuffix: $("mergeSuffix"),
+    mergeConfirmBtn: $("mergeConfirmBtn"),
+    mergeCancelBtn: $("mergeCancelBtn"),
+    mergeFeedback: $("mergeFeedback"),
+    successCard: $("successCard"),
+    hintBtn: $("hintBtn"),
+    undoBtn: $("undoBtn"),
+    resetBtn: $("resetBtn"),
+    computeBtn: $("computeBtn"),
+    nextBtn: $("nextBtn"),
+    nextLabel: $("nextLabel"),
+    progressText: $("progressText"),
+    levelDots: $("levelDots"),
+    helpBtn: $("helpBtn"),
+    helpDialog: $("helpDialog"),
+    closeHelpBtn: $("closeHelpBtn"),
+    helpStartBtn: $("helpStartBtn"),
+    soundBtn: $("soundBtn"),
+    completeDialog: $("completeDialog"),
+    completeText: $("completeText"),
+    completeCloseBtn: $("completeCloseBtn"),
+    completeRestartBtn: $("completeRestartBtn"),
+    toast: $("toast"),
+    confettiLayer: $("confettiLayer")
+  };
+
+  const state = {
+    levelIndex: 0,
+    left: [],
+    right: [],
+    original: { left: [], right: [] },
+    divisor: null,
+    manualCombine: false,
+    pendingPair: null,
+    preface: "",
+    devMode: false,
+    completionShown: false,
+    history: [],
+    moves: 0,
+    solved: false,
+    solution: null,
+    lastAction: null,
+    arrivedIds: [],
+    completed: new Set(),
+    soundOn: true,
+    tapTipShown: false
+  };
+
+  let termSeq = 0;
+  let drag = null;
+  let toastTimer = 0;
+  let inviteTimer = 0;
+  let hintTimer = 0;
+  let hintCaptionTimer = 0;
+  let confettiTimer = 0;
+  let completionTimer = 0;
+  let titleClickCount = 0;
+  let titleClickTimer = 0;
+  let audioContext = null;
+
+  const cloneTerms = (terms) => terms.map((term) => ({ ...term }));
+  const cloneDivisor = (divisor) => (divisor ? { ...divisor } : null);
+  const otherSide = (side) => (side === "left" ? "right" : "left");
+  const sideLabel = (side) => (side === "left" ? "左边" : "右边");
+
+  function createTermId() {
+    termSeq += 1;
+    return "term-" + termSeq;
+  }
+
+  function createXTerm(coeff, sign) {
+    return {
+      id: createTermId(),
+      kind: "x",
+      coeff,
+      sign
+    };
+  }
+
+  function createNumberTerm(value) {
+    return {
+      id: createTermId(),
+      kind: "number",
+      value: Math.abs(value),
+      sign: value < 0 ? -1 : 1
+    };
+  }
+
+  function parseEquation(raw) {
+    const normalized = raw.replace(
+      /(\d+)\s*[×*]\s*(\d+)/g,
+      function (match, left, right) {
+        return String(Number(left) * Number(right));
+      }
+    );
+    const parts = normalized.split("=");
+    if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+      throw new Error("无法解析方程：" + raw);
+    }
+    return {
+      left: parseSide(parts[0]),
+      right: parseSide(parts[1])
+    };
+  }
+
+  function parseSide(raw) {
+    const text = raw
+      .replace(/[−–—－]/g, "-")
+      .replace(/＋/g, "+")
+      .replace(/\s+/g, "");
+    const terms = [];
+    const pattern = /([+-]?)(?:(\d*)x|(\d+))/g;
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+      const sign = match[1] === "-" ? -1 : 1;
+      if (match[2] !== undefined) {
+        const coeff = match[2] === "" ? 1 : Number(match[2]);
+        terms.push(createXTerm(coeff, sign));
+      } else {
+        terms.push(createNumberTerm(Number(match[3]) * sign));
+      }
+    }
+
+    if (!terms.length) {
+      throw new Error("无法解析算式：" + raw);
+    }
+
+    return terms;
+  }
+
+  function termValueText(term) {
+    if (term.kind === "x") {
+      return term.coeff === 1 ? "x" : term.coeff + "x";
+    }
+    return String(term.value);
+  }
+
+  function signedTermText(term, signOverride) {
+    const sign = signOverride === undefined ? term.sign : signOverride;
+    return (sign > 0 ? "+" : "−") + termValueText(term);
+  }
+
+  function moveTermLabel(term) {
+    return term.sign > 0 ? termValueText(term) : signedTermText(term);
+  }
+
+
+
+  function formatExpression(terms, xValue) {
+    if (!terms.length) return "0";
+
+    let result = "";
+    terms.forEach((term, index) => {
+      let valueText;
+
+      if (term.kind === "x") {
+        if (xValue === undefined) {
+          valueText = termValueText(term);
+        } else {
+          const xText = xValue < 0 ? "(" + xValue + ")" : String(xValue);
+          valueText = term.coeff === 1 ? xText : term.coeff + " × " + xText;
+        }
+      } else {
+        valueText = String(term.value);
+      }
+
+      if (index === 0) {
+        if (term.sign === -1) result += "−";
+      } else {
+        result += term.sign === -1 ? " − " : " + ";
+      }
+      result += valueText;
+    });
+
+    return result;
+  }
+
+  function evalTerms(terms, xValue) {
+    return terms.reduce((sum, term) => {
+      if (term.kind === "x") {
+        return sum + term.sign * term.coeff * xValue;
+      }
+      return sum + term.sign * term.value;
+    }, 0);
+  }
+
+  function sumXCoefficient(terms) {
+    return terms.reduce((sum, term) => {
+      return term.kind === "x" ? sum + term.sign * term.coeff : sum;
+    }, 0);
+  }
+
+  function hasNegativeXCombo(terms) {
+    return (
+      terms.filter((term) => term.kind === "x").length > 1 &&
+      sumXCoefficient(terms) < 0
+    );
+  }
+
+  function getNegativeComboSide() {
+    if (hasNegativeXCombo(state.left)) return "left";
+    if (hasNegativeXCombo(state.right)) return "right";
+    return null;
+  }
+
+  function allX(terms) {
+    return terms.length > 0 && terms.every((term) => term.kind === "x");
+  }
+
+  function allNumbers(terms) {
+    return terms.every((term) => term.kind === "number");
+  }
+
+  function checkOriginal(xValue) {
+    const leftValue = evalTerms(state.original.left, xValue);
+    const rightValue = evalTerms(state.original.right, xValue);
+    return {
+      leftText: formatExpression(state.original.left, xValue),
+      rightText: formatExpression(state.original.right, xValue),
+      leftValue,
+      rightValue,
+      ok: Math.abs(leftValue - rightValue) < 1e-9
+    };
+  }
+
+  function getXSide() {
+    const sides = ["left", "right"].filter((side) => {
+      return state[side].some((term) => term.kind === "x");
+    });
+    return sides.length === 1 ? sides[0] : null;
+  }
+
+  function hasXOnBothSides() {
+    return (
+      state.left.some((term) => term.kind === "x") &&
+      state.right.some((term) => term.kind === "x")
+    );
+  }
+
+  function isXIsolated() {
+    const side = getXSide();
+    if (!side) return false;
+    const terms = state[side];
+    return (
+      terms.length === 1 &&
+      terms[0].kind === "x" &&
+      terms[0].coeff === 1 &&
+      terms[0].sign === 1
+    );
+  }
+
+  function getNumericSide() {
+    const xSide = getXSide();
+    return xSide ? otherSide(xSide) : null;
+  }
+
+  function getSuggestedPair() {
+    if (!state.manualCombine || state.pendingPair || state.solved || state.divisor) {
+      return null;
+    }
+
+    for (let s = 0; s < 2; s += 1) {
+      const side = s === 0 ? "left" : "right";
+      const terms = state[side].filter((term) => term.kind === "x");
+      if (terms.length >= 2) {
+        return {
+          side,
+          kind: "x",
+          source: terms[0],
+          target: terms[1]
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function hasMergeablePair() {
+    return Boolean(getSuggestedPair());
+  }
+
+  function getUnlockedUpTo() {
+    if (state.devMode) return LEVELS.length - 1;
+    let highestCompleted = -1;
+    state.completed.forEach(function (index) {
+      if (index > highestCompleted) highestCompleted = index;
+    });
+    return Math.min(LEVELS.length - 1, highestCompleted + 1);
+  }
+
+  function isLevelLocked(index) {
+    return !state.devMode && index > getUnlockedUpTo();
+  }
+
+  function getPairTerms(pair) {
+    if (!pair) return null;
+    const terms = state[pair.side];
+    const first = terms.find((term) => term.id === pair.ids[0]);
+    const second = terms.find((term) => term.id === pair.ids[1]);
+    if (!first || !second) return null;
+    return {
+      first,
+      second,
+      firstIndex: terms.indexOf(first),
+      secondIndex: terms.indexOf(second)
+    };
+  }
+
+  function getCoefficientTarget() {
+    if (state.solved || state.divisor) return null;
+
+    const side = getXSide();
+    if (!side) return null;
+
+    const xTerms = state[side];
+    if (xTerms.length !== 1) return null;
+
+    const xTerm = xTerms[0];
+    if (xTerm.kind !== "x" || xTerm.coeff <= 1 || xTerm.sign < 0) return null;
+
+    const numericSide = otherSide(side);
+    if (state[numericSide].length !== 1) return null;
+    if (state[numericSide][0].kind !== "number") return null;
+
+    return {
+      term: xTerm,
+      from: side,
+      target: numericSide
+    };
+  }
+
+  function canSimplify() {
+    if (state.solved) return false;
+    if (state.pendingPair) return false;
+    if (state.manualCombine && hasMergeablePair()) return false;
+
+    if (state.divisor) {
+      if (!isXIsolated()) return false;
+      const numericSide = getNumericSide();
+      return numericSide && state[numericSide].length === 1 && allNumbers(state[numericSide]);
+    }
+
+    const xSide = getXSide();
+    if (!xSide) return false;
+
+    const numericSide = otherSide(xSide);
+    if (!allX(state[xSide]) || !allNumbers(state[numericSide])) return false;
+    if (getCoefficientTarget()) return false;
+
+    if (state[xSide].length === 1) {
+      const xTerm = state[xSide][0];
+      if (xTerm.sign < 0) return false;
+    }
+
+    return true;
+  }
+
+  function getSuggestedAction() {
+    if (state.solved) return null;
+
+    if (state.pendingPair) {
+      return { type: "mergeInput" };
+    }
+
+    if (state.divisor) {
+      return { type: "compute", reason: "divide" };
+    }
+
+    if (hasXOnBothSides()) {
+      const leftTotal = sumXCoefficient(state.left);
+      const rightTotal = sumXCoefficient(state.right);
+
+      if (leftTotal === 0 || rightTotal === 0) {
+        return { type: "undo", reason: "x-zero" };
+      }
+
+      if (Math.abs(leftTotal) === Math.abs(rightTotal)) {
+        return { type: "undo", reason: "balance" };
+      }
+
+      if (leftTotal < 0 && rightTotal < 0) {
+        return { type: "undo", reason: "negative-x" };
+      }
+
+      let from;
+      if (leftTotal < 0 && rightTotal > 0) {
+        from = "left";
+      } else if (rightTotal < 0 && leftTotal > 0) {
+        from = "right";
+      } else {
+        from = Math.abs(leftTotal) <= Math.abs(rightTotal) ? "left" : "right";
+      }
+
+      const term = state[from].find((item) => item.kind === "x");
+      if (!term) return null;
+
+      return {
+        type: "move",
+        term,
+        from,
+        target: otherSide(from),
+        reason: "both"
+      };
+    }
+
+    const xSide = getXSide();
+    if (!xSide) return null;
+
+    const xTermsOnSide = state[xSide].filter((term) => term.kind === "x");
+    if (xTermsOnSide.length === 1 && xTermsOnSide[0].sign < 0) {
+      return {
+        type: "move",
+        term: xTermsOnSide[0],
+        from: xSide,
+        target: otherSide(xSide),
+        reason: "negative-x"
+      };
+    }
+
+    const constants = state[xSide].filter((term) => term.kind === "number");
+    if (constants.length) {
+      return {
+        type: "move",
+        term: constants[constants.length - 1],
+        from: xSide,
+        target: otherSide(xSide),
+        reason: "constant"
+      };
+    }
+
+    const numericSide = otherSide(xSide);
+    if (!allNumbers(state[numericSide])) {
+      return { type: "undo", reason: "not-ready" };
+    }
+
+    const xTerms = state[xSide];
+    const xTerm = xTerms[0];
+
+    if (xTerms.length === 1 && xTerm.sign < 0) {
+      return { type: "undo", reason: "negative-x" };
+    }
+
+    if (state.manualCombine) {
+      const pair = getSuggestedPair();
+      if (pair) {
+        return {
+          type: "pair",
+          source: pair.source,
+          target: pair.target,
+          side: pair.side,
+          kind: pair.kind
+        };
+      }
+    }
+
+    if (xTerms.length > 1 || state[numericSide].length > 1) {
+      return { type: "compute", reason: "combine" };
+    }
+
+    if (xTerm.coeff > 1) {
+      return {
+        type: "coefficient",
+        term: xTerm,
+        from: xSide,
+        target: numericSide
+      };
+    }
+
+    return { type: "compute", reason: "final" };
+  }
+
+  function getCombineTexts() {
+    const side = getXSide();
+    const numericSide = side ? otherSide(side) : null;
+    const xCount = side ? state[side].length : 0;
+    const numberCount = numericSide ? state[numericSide].length : 0;
+
+    if (xCount > 1 && numberCount > 1) {
+      return {
+        mission: "点「算一算」，把 x 和数字分别合起来",
+        caption: "点「算一算」，把 x 和数字分别合起来。",
+        hint: "点「算一算」，把 x 和数字分别合起来。"
+      };
+    }
+
+    if (xCount > 1) {
+      return {
+        mission: "x 都在一边了，点「算一算」合起来",
+        caption: "点「算一算」，把几个 x 合起来。",
+        hint: "点「算一算」，把几个 x 合起来。"
+      };
+    }
+
+    if (numberCount > 1) {
+      return {
+        mission: "点「算一算」，把" + sideLabel(numericSide) + "算成一个数",
+        caption: "点「算一算」，把" + sideLabel(numericSide) + "的算式算成一个数。",
+        hint: "点「算一算」，把" + sideLabel(numericSide) + "的算式算成一个数。"
+      };
+    }
+
+    return {
+      mission: "点「算一算」算出答案",
+      caption: "点「算一算」算出答案。",
+      hint: "点「算一算」算出答案。"
+    };
+  }
+
+  function buildMission() {
+    return LEVELS[state.levelIndex].equation;
+  }
+
+  function buildCaption() {
+    if (state.solved) {
+      const check = checkOriginal(state.solution);
+      return "检验：把 x = " + state.solution + " 代回原式，" +
+        check.leftText + " = " + check.rightText + "，等式成立。";
+    }
+
+    if (state.pendingPair) {
+      return "连线配对成功，直接填入合并后的 x 前面的数。";
+    }
+
+    if (state.preface && state.moves === 0) {
+      return state.preface + "。";
+    }
+
+    return "拖动方程中的项，观察等号两边怎样变化。";
+  }
+
+  function buildHintCaption(action) {
+    if (state.solved) {
+      const check = checkOriginal(state.solution);
+      return "检验：把 x = " + state.solution + " 代回原式，" +
+        check.leftText + " = " + check.rightText + "，等式成立。";
+    }
+
+    if (state.pendingPair) {
+      return "连线配对成功，直接填入合并后的 x 前面的数。";
+    }
+
+    if (state.divisor) {
+      const side = state.divisor.side;
+      return sideLabel(side) + "是 " + formatExpression(state[side]) +
+        " ÷ " + state.divisor.value + "，点「算一算」算出结果。";
+    }
+
+    if (action) {
+      if (action.type === "pair") {
+        return moveTermLabel(action.source) + " 和 " + moveTermLabel(action.target) +
+          " 都是" + (action.kind === "x" ? " x 项" : "数字") +
+          "，拖到一起配对，再填写合并结果。";
+      }
+
+      if (action.type === "coefficient") {
+        return "把 " + action.term.coeff + "x 里的 " + action.term.coeff +
+          " 拖到等号" + sideLabel(action.target) +
+          "，×" + action.term.coeff + " 会变成 ÷" + action.term.coeff + "。";
+      }
+
+      if (action.type === "compute") {
+        if (action.reason === "combine") {
+          return getCombineTexts().caption;
+        }
+        if (action.reason === "divide") {
+          return "点「算一算」，算出 ÷" + state.divisor.value + " 的结果。";
+        }
+        return "x 已经单独留下，点「算一算」算出答案。";
+      }
+
+      if (action.type === "move") {
+        if (action.reason === "both") {
+          return "等号两边都有 x，先把 x 搬到同一边。";
+        }
+        return "把 " + moveTermLabel(action.term) + " 拖到等号" +
+          sideLabel(action.target) + "，让 x 和数字分开。";
+      }
+
+      if (action.type === "undo") {
+        return "先点「撤销」，回到上一步再试试。";
+      }
+    }
+
+    return "拖一拖数字、3x 里的 3，或 x。跨过等号时，运算会变反。";
+  }
+
+  function updateUI() {
+    const ready = canSimplify();
+    const pending = Boolean(state.pendingPair);
+    const action = getSuggestedAction();
+    const canAdvance = state.devMode || state.solved || state.completed.has(state.levelIndex);
+
+    el.levelNum.textContent = String(state.levelIndex + 1);
+    el.mergeModeTag.hidden = !state.manualCombine;
+    el.devBadge.hidden = !state.devMode;
+    el.boardChipText.textContent = state.solved
+      ? "解出来啦，检查答案"
+      : pending
+        ? "连线配对成功，填出合并结果"
+        : "按住数字、3x 里的 3，或 x 拖动";
+    el.missionText.textContent = buildMission();
+    el.caption.textContent = buildCaption();
+    el.computeBtn.disabled = !ready;
+    el.computeBtn.classList.toggle("is-ready", ready);
+    el.undoBtn.disabled = state.history.length === 0 || pending;
+    el.nextBtn.classList.toggle("is-locked-next", !canAdvance);
+    el.nextBtn.setAttribute("aria-disabled", canAdvance ? "false" : "true");
+    el.nextBtn.classList.toggle("is-primary", state.solved);
+    el.nextBtn.title = canAdvance
+      ? (state.levelIndex === LEVELS.length - 1 ? "回到第 1 关" : "进入下一关")
+      : "先算出这一关的答案，才能进入下一关";
+    el.nextLabel.textContent = state.levelIndex === LEVELS.length - 1 ? "回到第 1 关" : "下一题";
+    el.board.classList.toggle("is-solved", state.solved);
+    el.board.classList.toggle("is-merging", pending);
+    el.mergePanel.hidden = !pending;
+
+    if (!state.solved) hideSuccess();
+    updateDots();
+  }
+
+  function updateDots() {
+    const buttons = el.levelDots.querySelectorAll(".level-dot");
+    buttons.forEach((button, index) => {
+      const current = index === state.levelIndex;
+      const completed = state.completed.has(index);
+      const locked = !current && isLevelLocked(index);
+      button.classList.toggle("is-current", current);
+      button.classList.toggle("is-completed", completed);
+      button.classList.toggle("is-locked", locked);
+      if (current) {
+        button.setAttribute("aria-current", "step");
+      } else {
+        button.removeAttribute("aria-current");
+      }
+      button.setAttribute("aria-disabled", locked ? "true" : "false");
+      button.setAttribute(
+        "aria-label",
+        "第 " + (index + 1) + " 关" +
+          (completed ? "，已完成" : "") +
+          (locked ? "，未解锁" : "") +
+          "：" + LEVELS[index].equation
+      );
+      button.title = locked
+        ? "完成前面的关卡后解锁"
+        : "第 " + (index + 1) + " 关 · " + LEVELS[index].equation;
+    });
+
+    el.progressText.textContent = state.completed.size + " / " + LEVELS.length;
+  }
+
+  function renderEquation() {
+    renderSide(el.leftSide, state.left, "left");
+    renderSide(el.rightSide, state.right, "right");
+    if (state.pendingPair) {
+      window.requestAnimationFrame(drawConnector);
+    } else {
+      clearConnector();
+    }
+  }
+
+  function renderSide(container, terms, sideName) {
+    container.innerHTML = "";
+
+    const divisor = state.divisor && state.divisor.side === sideName ? state.divisor : null;
+
+    if (!terms.length && !divisor) {
+      const zero = document.createElement("span");
+      zero.className = "zero";
+      zero.textContent = "0";
+      zero.setAttribute("aria-label", "零");
+      container.appendChild(zero);
+      return;
+    }
+
+    const coefficientTarget = getCoefficientTarget();
+    const arrivedIds = state.arrivedIds || [];
+    const lastAction = state.lastAction;
+    const numericSide = getNumericSide();
+    const negativeCombo = hasNegativeXCombo(terms);
+
+    if (divisor && terms.length > 1) {
+      const open = document.createElement("span");
+      open.className = "paren";
+      open.textContent = "(";
+      open.setAttribute("aria-hidden", "true");
+      container.appendChild(open);
+    }
+
+    terms.forEach((term, index) => {
+      const showOperator = index > 0 || term.sign < 0;
+      const group = document.createElement("span");
+      group.className = "term-group";
+
+      if (showOperator) {
+        const operator = document.createElement("span");
+        operator.className = "operator " + (term.sign > 0 ? "operator--plus" : "operator--minus");
+        operator.textContent = term.sign > 0 ? "+" : "−";
+        operator.setAttribute("aria-hidden", "true");
+        if (
+          lastAction &&
+          lastAction.type === "term" &&
+          lastAction.termId === term.id &&
+          lastAction.target === sideName
+        ) {
+          operator.classList.add("is-flipped");
+        }
+        group.appendChild(operator);
+      }
+
+      const wrap = document.createElement("span");
+      wrap.className = "term-wrap";
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "term term--" + term.kind;
+      if (term.kind === "x" && term.coeff > 1) {
+        button.classList.add("term--with-coef");
+      }
+      button.dataset.termId = term.id;
+      button.dataset.side = sideName;
+      button.dataset.kind = term.kind;
+      button.disabled = state.solved;
+      const spokenTerm = term.kind === "x" && term.coeff > 1
+        ? term.coeff + "乘x"
+        : termValueText(term);
+      button.setAttribute(
+        "aria-label",
+        (term.sign > 0 ? "正" : "负") +
+          spokenTerm +
+          "，在等号" + sideLabel(sideName) +
+          (state.solved
+            ? "，已解出"
+            : term.kind === "x" && term.coeff > 1
+              ? "，拖整项可移到等号另一边"
+              : "，可拖到等号另一边，也可按回车键移动")
+      );
+      button.title = state.solved
+        ? termValueText(term)
+        : term.kind === "x" && term.coeff > 1
+          ? "拖整张卡片：移项；拖左边的金色数字：变成除法"
+          : "拖到等号另一边";
+
+      const value = document.createElement("span");
+      value.className = "term-value";
+      value.textContent = term.kind === "x" ? "x" : term.value;
+
+      const grip = document.createElement("span");
+      grip.className = "term-grip";
+      grip.setAttribute("aria-hidden", "true");
+
+      button.append(value, grip);
+
+      if (arrivedIds.includes(term.id)) {
+        button.classList.add("is-arrived");
+      }
+
+      if (
+        state.solved &&
+        numericSide === sideName &&
+        terms.length === 1 &&
+        term.kind === "number"
+      ) {
+        button.classList.add("is-result");
+      }
+
+      wrap.appendChild(button);
+
+      if (state.pendingPair && state.pendingPair.ids.includes(term.id)) {
+        wrap.classList.add("is-paired");
+      }
+
+      if (term.kind === "x" && term.coeff > 1) {
+        const coefButton = document.createElement("button");
+        coefButton.type = "button";
+        coefButton.className = "coef-handle";
+        coefButton.dataset.termId = term.id;
+        coefButton.dataset.side = sideName;
+        coefButton.textContent = String(term.coeff);
+        coefButton.disabled = state.solved;
+        coefButton.setAttribute(
+          "aria-label",
+          term.coeff + "x 里的 " + term.coeff +
+            "，拖到等号另一边会变成除以 " + term.coeff
+        );
+        coefButton.title = "把 " + term.coeff + "x 里的 " + term.coeff +
+          " 拖到另一边，×" + term.coeff + " 变成 ÷" + term.coeff;
+        if (coefficientTarget && coefficientTarget.term.id === term.id) {
+          coefButton.classList.add("is-coef-ready");
+        }
+        wrap.appendChild(coefButton);
+
+        const times = document.createElement("span");
+        times.className = "coef-times";
+        times.textContent = "×";
+        times.setAttribute("aria-hidden", "true");
+        wrap.appendChild(times);
+      }
+
+      if (negativeCombo && term.kind === "x") {
+        wrap.classList.add("is-negative-combo");
+        wrap.title = "这些 x 项合起来是负数，先把负项搬到另一边。";
+        const warning = document.createElement("span");
+        warning.className = "term-negative-badge";
+        warning.textContent = "负";
+        warning.setAttribute("aria-hidden", "true");
+        wrap.appendChild(warning);
+      }
+
+      group.appendChild(wrap);
+      container.appendChild(group);
+    });
+
+    if (divisor) {
+      if (terms.length > 1) {
+        const close = document.createElement("span");
+        close.className = "paren";
+        close.textContent = ")";
+        close.setAttribute("aria-hidden", "true");
+        container.appendChild(close);
+      }
+
+      const division = document.createElement("span");
+      division.className = "division-group";
+
+      const op = document.createElement("span");
+      op.className = "operator operator--divide";
+      op.textContent = "÷";
+      op.setAttribute("aria-hidden", "true");
+
+      const tile = document.createElement("span");
+      tile.className = "division-tile";
+      tile.textContent = String(divisor.value);
+      tile.setAttribute("aria-label", "除以 " + divisor.value);
+
+      division.append(op, tile);
+
+      if (lastAction && lastAction.type === "coefficient") {
+        division.classList.add("is-arrived");
+      }
+
+      container.appendChild(division);
+    }
+  }
+
+  function hideSuccess() {
+    el.successCard.hidden = true;
+    el.successCard.innerHTML = "";
+  }
+
+  function renderSuccess() {
+    if (!state.solved) return;
+
+    const check = checkOriginal(state.solution);
+    const answer = "x = " + state.solution;
+    const checkMark = check.ok ? "✓" : "×";
+
+    el.successCard.innerHTML =
+      '<div class="success-star" aria-hidden="true">★</div>' +
+      '<div class="success-copy">' +
+        '<p class="success-kicker">解出来啦</p>' +
+        '<div class="success-answer">' + answer + "</div>" +
+        '<p class="success-check">检验：' + check.leftText + " = " + check.rightText +
+          ' <strong aria-label="' + (check.ok ? "等式成立" : "等式不成立") + '">' + checkMark + "</strong></p>" +
+      "</div>" +
+      '<div class="success-rule">运算变反<strong>＋↔－ ×↔÷</strong></div>';
+
+    el.successCard.hidden = false;
+  }
+
+  function pushHistory() {
+    state.history.push({
+      left: cloneTerms(state.left),
+      right: cloneTerms(state.right),
+      divisor: cloneDivisor(state.divisor),
+      moves: state.moves
+    });
+    if (state.history.length > 60) state.history.shift();
+  }
+
+  function insertTerm(side, term) {
+    state[side].push(term);
+  }
+
+  function performMove(termId, fromSide, toSide, options) {
+    if (state.solved || state.divisor || state.pendingPair || fromSide === toSide) return false;
+    if (!state[fromSide] || !state[toSide]) return false;
+
+    const source = state[fromSide];
+    const index = source.findIndex((term) => term.id === termId);
+    if (index === -1) return false;
+
+    pushHistory();
+
+    const term = source.splice(index, 1)[0];
+    const oldSign = term.sign;
+    term.sign = -term.sign;
+    insertTerm(toSide, term);
+    state.moves += 1;
+    state.lastAction = {
+      type: "term",
+      termId: term.id,
+      target: toSide,
+      oldSign,
+      newSign: term.sign,
+      kind: term.kind,
+      value: term.value,
+      coeff: term.coeff
+    };
+    state.arrivedIds = [term.id];
+
+    renderEquation();
+    updateUI();
+    playFlip();
+    clearInvite();
+    clearHint();
+    showToast(
+      signedTermText(term, oldSign) + " 跨过等号，变成 " + signedTermText(term, term.sign) + "。",
+      "flip"
+    );
+
+    if (options && options.focus) {
+      window.requestAnimationFrame(function () {
+        const movedTerm = el.equation.querySelector('.term[data-term-id="' + term.id + '"]');
+        if (movedTerm) movedTerm.focus({ preventScroll: true });
+      });
+    }
+
+    return true;
+  }
+
+  function coefficientFailureMessage(term) {
+    if (state.divisor) {
+      return "先点「算一算」，把除法算完。";
+    }
+
+    if (hasXOnBothSides()) {
+      return "先把两边的 x 搬到同一边，再搬 " + term.coeff + "x 里的 " + term.coeff + "。";
+    }
+
+    const side = getXSide();
+    if (!side) {
+      return "先整理一下方程。";
+    }
+
+    if (state[side].some((item) => item.kind === "number")) {
+      return "先把 " + termValueText(term) + " 旁边的数字搬走，再搬 " +
+        term.coeff + "x 里的 " + term.coeff + "。";
+    }
+
+    if (state[side].filter((item) => item.kind === "x").length > 1) {
+      return "先点「算一算」，把 x 项合并成一个。";
+    }
+
+    const numericSide = otherSide(side);
+    if (state[numericSide].length > 1) {
+      return "先点「算一算」，把等号另一边算成一个数。";
+    }
+
+    if (state[numericSide].some((item) => item.kind !== "number")) {
+      return "先把等号另一边整理成数字。";
+    }
+
+    return "先整理一下方程，再搬 3x 里的 3。";
+  }
+
+  function performCoefficientDivision(termId, fromSide, toSide, options) {
+    if (state.solved || state.divisor || state.pendingPair) return false;
+
+    const target = getCoefficientTarget();
+    if (
+      !target ||
+      target.term.id !== termId ||
+      target.from !== fromSide ||
+      target.target !== toSide
+    ) {
+      const term = state[fromSide].find((item) => item.id === termId);
+      if (term) showToast(coefficientFailureMessage(term));
+      return false;
+    }
+
+    pushHistory();
+
+    const term = target.term;
+    const oldCoeff = term.coeff;
+    term.coeff = 1;
+    state.divisor = {
+      side: toSide,
+      value: oldCoeff
+    };
+    state.lastAction = {
+      type: "coefficient",
+      termId: term.id,
+      target: toSide,
+      oldCoeff,
+      newCoeff: 1
+    };
+    state.arrivedIds = [term.id];
+
+    renderEquation();
+    updateUI();
+    playDivide();
+    clearInvite();
+    clearHint();
+    showToast("×" + oldCoeff + " 跨过等号，变成 ÷" + oldCoeff + "。", "flip");
+
+    if (options && options.focus) {
+      window.requestAnimationFrame(function () {
+        const xTerm = el.equation.querySelector('.term[data-term-id="' + term.id + '"]');
+        if (xTerm) xTerm.focus({ preventScroll: true });
+      });
+    }
+
+    return true;
+  }
+
+  function compute() {
+    ensureAudio();
+
+    if (state.solved) return;
+
+    if (state.pendingPair) {
+      showToast("先在方框里填出合并结果。");
+      el.mergeInput.focus();
+      return;
+    }
+
+    if (!canSimplify()) {
+      const pair = getSuggestedPair();
+      if (pair) {
+        showToast("先把同类项拖到一起配对，再填写合并结果。");
+        el.computeBtn.classList.remove("is-nudged");
+        void el.computeBtn.offsetWidth;
+        el.computeBtn.classList.add("is-nudged");
+        window.setTimeout(function () {
+          el.computeBtn.classList.remove("is-nudged");
+        }, 420);
+        return;
+      }
+
+      const action = getSuggestedAction();
+      if (action && action.type === "coefficient") {
+        showToast(
+          "把 " + action.term.coeff + "x 里的 " + action.term.coeff +
+          " 拖到等号" + sideLabel(action.target) +
+          "，变成 ÷" + action.term.coeff + "。"
+        );
+      } else if (action && action.type === "move") {
+        showToast("先把 " + moveTermLabel(action.term) + " 搬到等号" + sideLabel(action.target) + "。");
+      } else if (action && action.type === "undo") {
+        showToast("先点「撤销」，让方程回到更容易的样子。");
+      } else {
+        showToast("先把 x 单独留在等号一边，再点「算一算」。");
+      }
+
+      el.computeBtn.classList.remove("is-nudged");
+      void el.computeBtn.offsetWidth;
+      el.computeBtn.classList.add("is-nudged");
+      window.setTimeout(function () {
+        el.computeBtn.classList.remove("is-nudged");
+      }, 420);
+      return;
+    }
+
+    const xSide = getXSide();
+    const numericSide = otherSide(xSide);
+
+    if (state.divisor && isXIsolated()) {
+      const divisor = state.divisor;
+      const expression = formatExpression(state[numericSide]);
+      const before = evalTerms(state[numericSide], 0);
+      const total = before / divisor.value;
+      const resultTerm = createNumberTerm(total);
+
+      pushHistory();
+
+      state[numericSide] = [resultTerm];
+      state.divisor = null;
+      state.solved = true;
+      state.solution = total;
+      state.completed.add(state.levelIndex);
+      state.lastAction = {
+        type: "compute",
+        target: numericSide,
+        expression,
+        divisor: divisor.value,
+        total
+      };
+      state.arrivedIds = [resultTerm.id];
+
+      renderEquation();
+      updateUI();
+      renderSuccess();
+      clearInvite();
+      clearHint();
+      clearConfetti();
+      playSuccess();
+      showToast("算一算：" + expression + " ÷ " + divisor.value + " = " + total + "。");
+
+      confettiTimer = window.setTimeout(launchConfetti, 170);
+      maybeShowCompletion();
+      return;
+    }
+
+    const xTotal = sumXCoefficient(state[xSide]);
+    const numericTotal = evalTerms(state[numericSide], 0);
+
+    if (xTotal === 0) {
+      showToast("两个 x 抵消了，换一种搬法试试。");
+      return;
+    }
+
+    const xExpression = formatExpression(state[xSide]);
+    const numericExpression = formatExpression(state[numericSide]);
+    const newXTerm = createXTerm(Math.abs(xTotal), xTotal < 0 ? -1 : 1);
+    const newNumberTerm = createNumberTerm(numericTotal);
+
+    pushHistory();
+
+    state[xSide] = [newXTerm];
+    state[numericSide] = [newNumberTerm];
+    state.divisor = null;
+    state.arrivedIds = [newXTerm.id, newNumberTerm.id];
+
+    const solved = xTotal === 1;
+    if (solved) {
+      state.solved = true;
+      state.solution = numericTotal;
+      state.completed.add(state.levelIndex);
+      state.lastAction = {
+        type: "compute",
+        target: numericSide,
+        xExpression,
+        numericExpression,
+        total: numericTotal
+      };
+    } else {
+      state.solved = false;
+      state.solution = null;
+      state.lastAction = {
+        type: "combine",
+        xExpression,
+        numericExpression,
+        xTotal,
+        numericTotal
+      };
+    }
+
+    renderEquation();
+    updateUI();
+
+    if (solved) {
+      renderSuccess();
+      clearInvite();
+      clearHint();
+      clearConfetti();
+      playSuccess();
+      showToast("合并后：x = " + numericTotal + "。");
+      confettiTimer = window.setTimeout(launchConfetti, 170);
+      maybeShowCompletion();
+    } else {
+      clearInvite();
+      clearHint();
+      playMerge();
+      const nextTarget = getCoefficientTarget();
+      let message = "合并后：" + formatExpression(state[xSide]) + " = " + formatExpression(state[numericSide]) + "。";
+      if (nextTarget) {
+        message += "把 " + nextTarget.term.coeff + "x 里的 " +
+          nextTarget.term.coeff + " 拖到右边。";
+      }
+      showToast(message);
+    }
+  }
+
+  function undo() {
+    if (state.pendingPair) {
+      cancelPair();
+      return;
+    }
+
+    if (!state.history.length) {
+      showToast("还没有可以撤销的步骤。");
+      return;
+    }
+
+    clearConfetti();
+    const snapshot = state.history.pop();
+    state.left = cloneTerms(snapshot.left);
+    state.right = cloneTerms(snapshot.right);
+    state.divisor = cloneDivisor(snapshot.divisor);
+    state.moves = snapshot.moves;
+    state.solved = false;
+    state.solution = null;
+    state.lastAction = null;
+    state.arrivedIds = [];
+
+    hideSuccess();
+    renderEquation();
+    updateUI();
+    playUndo();
+    clearInvite();
+    clearHint();
+    showToast("回到上一步。");
+  }
+
+  function resetLevel() {
+    ensureAudio();
+    clearConfetti();
+
+    state.left = cloneTerms(state.original.left);
+    state.right = cloneTerms(state.original.right);
+    state.divisor = null;
+    state.pendingPair = null;
+    state.history = [];
+    state.moves = 0;
+    state.solved = false;
+    state.solution = null;
+    state.lastAction = null;
+    state.arrivedIds = [];
+
+    clearConnector();
+    hideSuccess();
+    renderEquation();
+    updateUI();
+    playUndo();
+    clearInvite();
+    clearHint();
+    showToast("重新开始这一题。");
+    scheduleInvite();
+  }
+
+  function loadLevel(index) {
+    if (drag) finishDrag(false);
+
+    window.clearTimeout(inviteTimer);
+    window.clearTimeout(hintTimer);
+    clearConfetti();
+    hideToast();
+
+    const safeIndex = ((index % LEVELS.length) + LEVELS.length) % LEVELS.length;
+    const level = LEVELS[safeIndex];
+    const parsed = parseEquation(level.equation);
+
+    state.levelIndex = safeIndex;
+    state.left = cloneTerms(parsed.left);
+    state.right = cloneTerms(parsed.right);
+    state.original = {
+      left: cloneTerms(parsed.left),
+      right: cloneTerms(parsed.right)
+    };
+    state.divisor = null;
+    state.manualCombine = Boolean(level.manualCombine);
+    state.pendingPair = null;
+    state.preface = level.preface || "";
+    state.history = [];
+    state.moves = 0;
+    state.solved = false;
+    state.solution = null;
+    state.lastAction = null;
+    state.arrivedIds = [];
+
+    clearConnector();
+    hideSuccess();
+    renderEquation();
+    updateUI();
+    clearHint();
+    clearInvite();
+    animateBoardIn();
+    scheduleInvite();
+  }
+
+  function toggleDevMode() {
+    state.devMode = !state.devMode;
+    titleClickCount = 0;
+    window.clearTimeout(titleClickTimer);
+
+    if (!state.devMode) {
+      const unlockedUpTo = getUnlockedUpTo();
+      if (state.levelIndex > unlockedUpTo) {
+        loadLevel(unlockedUpTo);
+      }
+    }
+
+    updateUI();
+    updateDots();
+
+    if (state.devMode) {
+      showToast("开发者模式已开启：全部 " + LEVELS.length + " 关已解锁。");
+    } else {
+      showToast("开发者模式已关闭。");
+    }
+  }
+
+  function nextLevel() {
+    if (!state.devMode && !state.solved && !state.completed.has(state.levelIndex)) {
+      showToast("先算出这一关的答案，才能进入下一关。");
+      return;
+    }
+
+    const allDone = state.completed.size === LEVELS.length;
+    const next = (state.levelIndex + 1) % LEVELS.length;
+    loadLevel(next);
+    playTap();
+
+    if (allDone && next === 0) {
+      showToast("全部关卡完成，真棒！可以再演示一遍。");
+    }
+  }
+
+  function initDots() {
+    LEVELS.forEach((level, index) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "level-dot";
+      if (level.manualCombine) button.classList.add("is-merge-level");
+      button.dataset.level = String(index);
+      button.textContent = String(index + 1);
+      button.title = "第 " + (index + 1) + " 关 · " + level.equation;
+      button.setAttribute("aria-label", "第 " + (index + 1) + " 关：" + level.equation);
+      el.levelDots.appendChild(button);
+    });
+  }
+
+  function animateBoardIn() {
+    if (reduceMotion() || !el.board.animate) return;
+    el.board.animate(
+      [
+        { opacity: 0.65, transform: "translateY(6px) scale(0.995)" },
+        { opacity: 1, transform: "translateY(0) scale(1)" }
+      ],
+      { duration: 280, easing: "cubic-bezier(0.2, 0.8, 0.3, 1)" }
+    );
+  }
+
+  function scheduleInvite() {
+    window.clearTimeout(inviteTimer);
+    clearInviteClasses();
+
+    if (state.levelIndex !== 0 || state.moves > 0 || state.solved) return;
+
+    inviteTimer = window.setTimeout(function () {
+      if (state.moves > 0 || state.solved) return;
+      const action = getSuggestedAction();
+      if (!action || action.type !== "move") return;
+      const termEl = findTermElement(action.term.id);
+      if (termEl) termEl.classList.add("is-inviting");
+    }, 1500);
+  }
+
+  function clearInviteClasses() {
+    el.equation.querySelectorAll(".term.is-inviting").forEach(function (term) {
+      term.classList.remove("is-inviting");
+    });
+  }
+
+  function clearInvite() {
+    window.clearTimeout(inviteTimer);
+    clearInviteClasses();
+  }
+
+  function clearHint() {
+    window.clearTimeout(hintTimer);
+    window.clearTimeout(hintCaptionTimer);
+    el.equation.querySelectorAll(".term.is-hinted, .coef-handle.is-hinted").forEach(function (node) {
+      node.classList.remove("is-hinted");
+    });
+    el.caption.textContent = buildCaption();
+  }
+
+  function setHintCaption(text) {
+    window.clearTimeout(hintCaptionTimer);
+    el.caption.textContent = text;
+    hintCaptionTimer = window.setTimeout(function () {
+      el.caption.textContent = buildCaption();
+    }, 3600);
+  }
+
+  function findTermElement(termId) {
+    return el.equation.querySelector('.term[data-term-id="' + termId + '"]');
+  }
+
+  function findCoefficientElement(termId) {
+    return el.equation.querySelector('.coef-handle[data-term-id="' + termId + '"]');
+  }
+
+  function showHint() {
+    ensureAudio();
+    clearInvite();
+    clearHint();
+
+    if (state.solved) {
+      showToast("已经解出来啦！点「下一题」继续。");
+      return;
+    }
+
+    if (state.pendingPair) {
+      showToast("先在方框里填出合并结果。");
+      el.mergeInput.focus();
+      return;
+    }
+
+    const action = getSuggestedAction();
+
+    if (!action) {
+      showToast("先点「撤销」，让方程回到更容易的样子。");
+      return;
+    }
+
+    const negativeSide = getNegativeComboSide();
+    if (negativeSide) {
+      const xTerms = state[negativeSide].filter((term) => term.kind === "x");
+      xTerms.forEach(function (term) {
+        const termEl = findTermElement(term.id);
+        if (termEl) termEl.classList.add("is-hinted");
+      });
+      hintTimer = window.setTimeout(function () {
+        xTerms.forEach(function (term) {
+          const termEl = findTermElement(term.id);
+          if (termEl) termEl.classList.remove("is-hinted");
+        });
+      }, 3600);
+      setHintCaption("红色 x 项合起来是负数，先把负项搬到另一边，再合并。");
+      showToast("红色 x 项合起来是负数，先别急着合并。");
+      playTap();
+      return;
+    }
+
+    setHintCaption(buildHintCaption(action));
+
+    if (action.type === "pair") {
+      const sourceEl = findTermElement(action.source.id);
+      const targetEl = findTermElement(action.target.id);
+      [sourceEl, targetEl].forEach(function (termEl) {
+        if (termEl) termEl.classList.add("is-hinted");
+      });
+      hintTimer = window.setTimeout(function () {
+        [sourceEl, targetEl].forEach(function (termEl) {
+          if (termEl) termEl.classList.remove("is-hinted");
+        });
+      }, 3400);
+      showToast(
+        "把 " + moveTermLabel(action.source) + " 拖到 " +
+        moveTermLabel(action.target) + " 上，配对同类项。"
+      );
+      playTap();
+      return;
+    }
+
+    if (action.type === "move") {
+      const termEl = findTermElement(action.term.id);
+      if (termEl) {
+        termEl.classList.add("is-hinted");
+        hintTimer = window.setTimeout(function () {
+          termEl.classList.remove("is-hinted");
+        }, 3400);
+      }
+      showToast(
+        "试试把 " + moveTermLabel(action.term) +
+        " 拖到等号" + sideLabel(action.target) + "。"
+      );
+      playTap();
+      return;
+    }
+
+    if (action.type === "coefficient") {
+      const coefEl = findCoefficientElement(action.term.id);
+      if (coefEl) {
+        coefEl.classList.add("is-hinted");
+        hintTimer = window.setTimeout(function () {
+          coefEl.classList.remove("is-hinted");
+        }, 3400);
+      }
+      showToast(
+        "试试把 " + action.term.coeff + "x 里的 " + action.term.coeff +
+        " 拖到等号" + sideLabel(action.target) +
+        "，变成 ÷" + action.term.coeff + "。"
+      );
+      playTap();
+      return;
+    }
+
+    if (action.type === "compute") {
+      if (action.reason === "combine") {
+        showToast(getCombineTexts().hint);
+      } else if (action.reason === "divide") {
+        showToast("点「算一算」，算出 ÷" + state.divisor.value + " 的结果。");
+      } else {
+        showToast("x 已经单独留下啦，点「算一算」。");
+      }
+      playTap();
+      return;
+    }
+
+    showToast("先点「撤销」，回到上一步再试试。");
+  }
+
+  /* ---------- Drag interaction ---------- */
+
+  function onPointerDown(event) {
+    if (state.pendingPair) {
+      el.mergeInput.focus();
+      return;
+    }
+    if (state.solved || drag) return;
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (event.isPrimary === false) return;
+
+    const coefEl = event.target.closest(".coef-handle");
+    if (coefEl) {
+      const side = coefEl.dataset.side;
+      const termId = coefEl.dataset.termId;
+      const term = state[side].find((item) => item.id === termId);
+      if (!term) return;
+
+      if (state.divisor) {
+        showToast("先点「算一算」，把除法算完。");
+        return;
+      }
+
+      const target = getCoefficientTarget();
+      if (!target || target.term.id !== termId || target.from !== side) {
+        showToast(coefficientFailureMessage(term));
+        return;
+      }
+
+      event.preventDefault();
+      ensureAudio();
+      clearInvite();
+      clearHint();
+
+      const rect = coefEl.getBoundingClientRect();
+      const touch = event.pointerType === "touch";
+
+      drag = {
+        type: "coef",
+        pointerId: event.pointerId,
+        termId,
+        term,
+        side,
+        termEl: findTermElement(termId),
+        coefEl,
+        wrap: coefEl.closest(".term-wrap"),
+        startX: event.clientX,
+        startY: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        offsetX: rect.width / 2,
+        offsetY: rect.height / 2,
+        lift: touch ? 48 : 0,
+        tilt: 0,
+        started: false,
+        previewTarget: undefined,
+        pairTarget: null,
+        ghost: null,
+        coefOpEl: null,
+        signEl: null,
+        sourceRect: rect
+      };
+
+      beginPointerTracking();
+      return;
+    }
+
+    const termEl = event.target.closest(".term");
+    if (!termEl || !el.equation.contains(termEl) || termEl.disabled) return;
+
+    if (state.divisor) {
+      showToast("先点「算一算」，把除法算完。");
+      return;
+    }
+
+    const side = termEl.dataset.side;
+    const termId = termEl.dataset.termId;
+    const term = state[side].find((item) => item.id === termId);
+    if (!term) return;
+
+    event.preventDefault();
+    ensureAudio();
+    clearInvite();
+    clearHint();
+
+    const rect = termEl.getBoundingClientRect();
+    const touch = event.pointerType === "touch";
+
+    drag = {
+      type: "term",
+      pointerId: event.pointerId,
+      termId,
+      term,
+      side,
+      termEl,
+      coefEl: null,
+      wrap: termEl.closest(".term-wrap"),
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      offsetX: touch ? rect.width / 2 : event.clientX - rect.left,
+      offsetY: touch ? rect.height / 2 : event.clientY - rect.top,
+      lift: touch ? Math.min(64, rect.height * 0.8) : 0,
+      tilt: 0,
+      started: false,
+      previewTarget: undefined,
+      pairTarget: null,
+      ghost: null,
+      coefOpEl: null,
+      signEl: null,
+      sourceRect: rect
+    };
+
+    beginPointerTracking();
+  }
+
+  function beginPointerTracking() {
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerUp);
+    window.addEventListener("pointercancel", onPointerCancel);
+  }
+
+  function startDrag(event) {
+    const d = drag;
+    if (!d) return;
+
+    d.started = true;
+
+    if (d.type === "coef") {
+      createCoefficientGhost(d);
+      if (d.wrap) d.wrap.classList.add("is-coef-dragging");
+      const sourceSide = d.termEl ? d.termEl.closest(".side") : null;
+      if (sourceSide) sourceSide.classList.add("is-source");
+      el.caption.textContent =
+        "把 " + d.term.coeff + "x 里的 " + d.term.coeff +
+        " 拖到等号" + sideLabel(otherSide(d.side)) +
+        "，×" + d.term.coeff + " 会变成 ÷" + d.term.coeff + "。";
+    } else {
+      createTermGhost(d);
+      if (d.wrap) d.wrap.classList.add("is-dragging");
+      const group = d.termEl ? d.termEl.closest(".term-group") : null;
+      if (group) group.classList.add("is-source-group");
+      const sourceSide = d.termEl ? d.termEl.closest(".side") : null;
+      if (sourceSide) sourceSide.classList.add("is-source");
+      addPairCandidates(d);
+      el.caption.textContent =
+        state.manualCombine && d.term.kind === "number"
+          ? "数字不用配对，点「算一算」直接算；也可以拖过等号移项。"
+          : state.manualCombine && hasSameKindPeer(d)
+            ? "把 " + moveTermLabel(d.term) + " 拖到另一个 x 项上配对；拖过等号则是移项。"
+            : "把 " + signedTermText(d.term) + " 拖到等号" +
+              sideLabel(otherSide(d.side)) + "，跨过等号就会变反。";
+    }
+
+    document.body.classList.add("is-dragging");
+    positionGhost(event.clientX, event.clientY);
+    playPickup();
+  }
+
+  function createTermGhost(d) {
+    const ghost = document.createElement("div");
+    ghost.className = "drag-ghost";
+    ghost.dataset.kind = d.term.kind;
+    if (d.term.kind === "x" && d.term.coeff > 1) {
+      ghost.classList.add("is-coef-term");
+    }
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.style.width = d.sourceRect.width + "px";
+    ghost.style.height = d.sourceRect.height + "px";
+
+    const sign = document.createElement("span");
+    sign.className = "ghost-sign";
+
+    const value = document.createElement("span");
+    value.className = "ghost-value";
+    value.textContent = termValueText(d.term);
+
+    ghost.append(sign, value);
+    document.body.appendChild(ghost);
+
+    d.ghost = ghost;
+    d.signEl = sign;
+    setGhostSign(d.term.sign);
+  }
+
+  function createCoefficientGhost(d) {
+    const ghost = document.createElement("div");
+    ghost.className = "drag-ghost drag-ghost--coef";
+    ghost.setAttribute("aria-hidden", "true");
+
+    const op = document.createElement("span");
+    op.className = "ghost-coef-op";
+    op.textContent = "×";
+
+    const value = document.createElement("span");
+    value.className = "ghost-coef-value";
+    value.textContent = String(d.term.coeff);
+
+    ghost.append(op, value);
+    document.body.appendChild(ghost);
+
+    d.ghost = ghost;
+    d.coefOpEl = op;
+  }
+
+  function onPointerMove(event) {
+    if (!drag) return;
+    if (event.pointerId !== undefined && drag.pointerId !== undefined && event.pointerId !== drag.pointerId) {
+      return;
+    }
+
+    if (!drag.started) {
+      const distance = Math.hypot(
+        event.clientX - drag.startX,
+        event.clientY - drag.startY
+      );
+      if (distance < 6) return;
+      startDrag(event);
+    }
+
+    if (event.cancelable) event.preventDefault();
+
+    const dx = event.clientX - drag.lastX;
+    drag.tilt = Math.max(-3, Math.min(3, dx * 0.14));
+    drag.lastX = event.clientX;
+    drag.lastY = event.clientY;
+    positionGhost(event.clientX, event.clientY);
+
+    const hit = sideAtPoint(event.clientX, event.clientY);
+    const sideTarget = hit && hit !== drag.side ? hit : null;
+
+    if (sideTarget) {
+      clearPairPreview();
+      clearDropTargets();
+      if (sideTarget !== drag.previewTarget) {
+        drag.previewTarget = sideTarget;
+        setDropPreview(sideTarget, drag.term);
+      }
+      return;
+    }
+
+    if (state.manualCombine && drag.type === "term") {
+      if (drag.previewTarget) {
+        drag.previewTarget = null;
+        setDropPreview(null, drag.term);
+      }
+      clearDropTargets();
+      const pair = findPairTargetAtPoint(event.clientX, event.clientY, drag);
+      const pairId = pair ? pair.term.id : null;
+      const currentId = drag.pairTarget ? drag.pairTarget.term.id : null;
+      if (pairId !== currentId) {
+        setPairPreview(pair);
+      }
+      return;
+    }
+
+    if (drag.previewTarget !== null && drag.previewTarget !== undefined) {
+      drag.previewTarget = null;
+      setDropPreview(null, drag.term);
+    }
+    clearPairPreview();
+  }
+
+  function onPointerUp(event) {
+    if (!drag) return;
+    if (event.pointerId !== undefined && drag.pointerId !== undefined && event.pointerId !== drag.pointerId) {
+      return;
+    }
+
+    const d = drag;
+
+    if (!d.started) {
+      finishDrag(false);
+      if (!state.tapTipShown) {
+        state.tapTipShown = true;
+        showToast("按住数字、3x 里的 3，或 x，拖过中间的等号。");
+      }
+      return;
+    }
+
+    const hit = sideAtPoint(event.clientX, event.clientY);
+
+    if (hit && hit !== d.side) {
+      const termId = d.termId;
+      const fromSide = d.side;
+      const type = d.type;
+      finishDrag(false);
+
+      if (type === "coef") {
+        performCoefficientDivision(termId, fromSide, hit);
+      } else {
+        performMove(termId, fromSide, hit);
+      }
+      return;
+    }
+
+    if (d.type === "term" && state.manualCombine) {
+      const pair = findPairTargetAtPoint(event.clientX, event.clientY, d);
+      if (pair) {
+        if (pair.valid) {
+          const sourceId = d.termId;
+          const targetId = pair.term.id;
+          const side = d.side;
+          finishDrag(false);
+          beginPair(sourceId, targetId, side);
+        } else {
+          finishDrag(true);
+          updateUI();
+          showToast("它们不是同类项：一个是 x 项，一个是数字，不能配对。");
+        }
+        return;
+      }
+    }
+
+    const droppedOnSource = hit === d.side;
+    finishDrag(true);
+    updateUI();
+
+    if (droppedOnSource) {
+      showToast(
+        d.type === "coef"
+          ? "要拖到等号另一边，×才会变成÷哦。"
+          : state.manualCombine && d.type === "term" && d.term.kind === "number"
+            ? "数字不用配对，点「算一算」直接算。"
+            : state.manualCombine
+              ? "把 x 项拖到一起配对，或者拖过等号移项。"
+              : "要拖到等号另一边，运算才会变反哦。"
+      );
+    }
+  }
+
+  function onPointerCancel() {
+    if (!drag) return;
+    finishDrag(true);
+    updateUI();
+  }
+
+  function finishDrag(animateBack) {
+    if (!drag) return;
+
+    const d = drag;
+    drag = null;
+
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerCancel);
+
+    document.body.classList.remove("is-dragging");
+
+    if (d.wrap) d.wrap.classList.remove("is-dragging", "is-coef-dragging");
+
+    const sourceGroup = d.termEl ? d.termEl.closest(".term-group") : null;
+    if (sourceGroup) sourceGroup.classList.remove("is-source-group");
+
+    const sourceSide = d.termEl ? d.termEl.closest(".side") : null;
+    if (sourceSide) sourceSide.classList.remove("is-source");
+
+    clearDropTargets();
+    clearPairCandidateClasses();
+
+    if (d.ghost) {
+      if (animateBack && d.started) {
+        const targetRect = d.sourceRect;
+        const startTransform = d.ghost.style.transform;
+        const endTransform =
+          "translate3d(" + targetRect.left + "px, " + targetRect.top + "px, 0) scale(1) rotate(0deg)";
+
+        const animation = d.ghost.animate(
+          [
+            { transform: startTransform, opacity: 1 },
+            { transform: endTransform, opacity: 0.4 }
+          ],
+          { duration: 210, easing: "cubic-bezier(0.2, 0.8, 0.3, 1)" }
+        );
+
+        const removeGhost = function () {
+          if (d.ghost) d.ghost.remove();
+        };
+
+        animation.addEventListener("finish", removeGhost, { once: true });
+        window.setTimeout(removeGhost, 320);
+      } else {
+        d.ghost.remove();
+      }
+    }
+  }
+
+  function positionGhost(clientX, clientY) {
+    if (!drag || !drag.ghost) return;
+    const x = clientX - drag.offsetX;
+    const y = clientY - drag.offsetY - drag.lift;
+    const transform =
+      "translate3d(" + x + "px, " + y + "px, 0) scale(1.06) rotate(" + drag.tilt + "deg)";
+    drag.ghost.style.transform = transform;
+  }
+
+  function setGhostSign(sign) {
+    if (!drag || !drag.signEl) return;
+    drag.signEl.textContent = sign > 0 ? "+" : "−";
+    drag.signEl.classList.toggle("is-minus", sign < 0);
+  }
+
+  function setCoefficientGhostDividing(active) {
+    if (!drag || !drag.ghost || drag.type !== "coef") return;
+    drag.ghost.classList.toggle("is-dividing", active);
+    if (drag.coefOpEl) drag.coefOpEl.textContent = active ? "÷" : "×";
+    drag.ghost.dataset.note = active
+      ? "×" + drag.term.coeff + " → ÷" + drag.term.coeff
+      : "";
+  }
+
+  function sideAtPoint(clientX, clientY) {
+    const sides = [el.leftSide, el.rightSide];
+    for (let i = 0; i < sides.length; i += 1) {
+      const rect = sides[i].getBoundingClientRect();
+      if (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      ) {
+        return sides[i].dataset.side;
+      }
+    }
+    return null;
+  }
+
+  function setDropPreview(target, term) {
+    clearDropTargets();
+
+    if (!drag) return;
+
+    if (!target) {
+      if (drag.type === "coef") {
+        setCoefficientGhostDividing(false);
+        if (drag.started) {
+          el.caption.textContent =
+            "把 " + term.coeff + "x 里的 " + term.coeff +
+            " 拖到等号" + sideLabel(otherSide(drag.side)) +
+            "，×" + term.coeff + " 会变成 ÷" + term.coeff + "。";
+        }
+      } else {
+        if (drag.ghost) {
+          drag.ghost.classList.remove("is-flipping");
+          drag.ghost.dataset.note = "";
+        }
+        setGhostSign(term.sign);
+        if (drag.started) {
+          el.caption.textContent =
+            "把 " + signedTermText(term) + " 拖到等号" +
+            sideLabel(otherSide(drag.side)) + "，跨过等号就会变反。";
+        }
+      }
+      return;
+    }
+
+    const targetEl = target === "left" ? el.leftSide : el.rightSide;
+
+    if (drag.type === "coef") {
+      const targetExpression = formatExpression(state[target]);
+      const cue = "松手放这里 · " + targetExpression + " ÷ " + term.coeff;
+      targetEl.dataset.dropCue = cue;
+      targetEl.classList.add("is-drop-target");
+      setCoefficientGhostDividing(true);
+      el.caption.textContent =
+        "松手放在" + sideLabel(target) + "：" + targetExpression + " ÷ " + term.coeff +
+        "，×" + term.coeff + " 会变成 ÷" + term.coeff + "。";
+      return;
+    }
+
+    const predictedSign = -term.sign;
+    const before = signedTermText(term);
+    const after = signedTermText(term, predictedSign);
+
+    targetEl.dataset.dropCue = "松手放这里 · " + before + " → " + after;
+    targetEl.classList.add("is-drop-target");
+
+    if (drag.ghost) {
+      drag.ghost.classList.remove("is-flipping");
+      void drag.ghost.offsetWidth;
+      drag.ghost.classList.add("is-flipping");
+      drag.ghost.dataset.note = before + " → " + after;
+    }
+    setGhostSign(predictedSign);
+
+    el.caption.textContent = "松手放在" + sideLabel(target) + "：" + before + " 会变成 " + after + "。";
+  }
+
+  function clearDropTargets() {
+    [el.leftSide, el.rightSide].forEach(function (sideEl) {
+      sideEl.classList.remove("is-drop-target");
+      sideEl.removeAttribute("data-drop-cue");
+    });
+  }
+
+  /* ---------- Manual pairing and merging ---------- */
+
+  function hasSameKindPeer(d) {
+    if (!d || !state.manualCombine || d.type !== "term" || d.term.kind !== "x") {
+      return false;
+    }
+    return state[d.side].some(function (term) {
+      return term.id !== d.termId && term.kind === "x";
+    });
+  }
+
+  function addPairCandidates(d) {
+    if (!state.manualCombine || d.type !== "term" || d.term.kind !== "x") return;
+    el.equation.querySelectorAll(".term-wrap").forEach(function (wrap) {
+      const termEl = wrap.querySelector(".term");
+      if (!termEl) return;
+      if (
+        termEl.dataset.side === d.side &&
+        termEl.dataset.termId !== d.termId &&
+        termEl.dataset.kind === "x"
+      ) {
+        wrap.classList.add("is-pair-candidate");
+      }
+    });
+  }
+
+  function clearPairCandidateClasses() {
+    el.equation.querySelectorAll(".term-wrap").forEach(function (wrap) {
+      wrap.classList.remove("is-pair-candidate", "is-pair-target", "is-pair-invalid");
+    });
+  }
+
+  function findPairTargetAtPoint(clientX, clientY, d) {
+    if (!state.manualCombine || !d || d.type !== "term" || d.term.kind !== "x") {
+      return null;
+    }
+    if (typeof document.elementFromPoint !== "function") return null;
+
+    const element = document.elementFromPoint(clientX, clientY);
+    if (!element) return null;
+
+    const wrap = element.closest(".term-wrap");
+    if (!wrap) return null;
+
+    const termEl = wrap.querySelector(".term");
+    if (!termEl || termEl.disabled) return null;
+    if (termEl.dataset.side !== d.side) return null;
+    if (termEl.dataset.termId === d.termId) return null;
+
+    const term = state[d.side].find(function (item) {
+      return item.id === termEl.dataset.termId;
+    });
+    if (!term) return null;
+
+    return {
+      term,
+      termEl,
+      wrap,
+      side: d.side,
+      valid: term.kind === d.term.kind
+    };
+  }
+
+  function clearPairPreview() {
+    el.equation.querySelectorAll(".term-wrap.is-pair-target, .term-wrap.is-pair-invalid").forEach(function (wrap) {
+      wrap.classList.remove("is-pair-target", "is-pair-invalid");
+    });
+    if (drag) drag.pairTarget = null;
+  }
+
+  function setPairPreview(pair) {
+    if (!drag) return;
+    clearPairPreview();
+
+    if (!pair) {
+      if (drag.started) {
+        el.caption.textContent = drag.term.kind === "number"
+          ? "数字不用配对，点「算一算」直接算，或拖过等号移项。"
+          : hasSameKindPeer(drag)
+            ? "把 " + moveTermLabel(drag.term) + " 拖到另一个 x 项上配对，或拖过等号移项。"
+            : "把 " + signedTermText(drag.term) + " 拖过等号，运算会变反。";
+      }
+      return;
+    }
+
+    drag.pairTarget = pair;
+    pair.wrap.classList.add(pair.valid ? "is-pair-target" : "is-pair-invalid");
+
+    if (pair.valid) {
+      el.caption.textContent =
+        "松手配对：" + moveTermLabel(drag.term) + " 和 " + moveTermLabel(pair.term) +
+        " 都是" + (pair.term.kind === "x" ? " x 项" : "数字") + "。";
+    } else {
+      el.caption.textContent = "它们不是同类项，不能配对。";
+    }
+  }
+
+  function beginPair(sourceId, targetId, side) {
+    if (!state.manualCombine || state.solved || state.divisor || state.pendingPair) {
+      return false;
+    }
+
+    const terms = state[side];
+    const source = terms.find(function (term) { return term.id === sourceId; });
+    const target = terms.find(function (term) { return term.id === targetId; });
+    if (!source || !target || source.id === target.id) return false;
+
+    if (source.kind !== "x" || target.kind !== "x") {
+      showToast("只有 x 项需要配对，数字点「算一算」直接算。");
+      return false;
+    }
+
+    state.pendingPair = {
+      side,
+      ids: [source.id, target.id],
+      kind: source.kind,
+      expected: null
+    };
+
+    clearInvite();
+    clearHint();
+    renderEquation();
+    updateUI();
+    renderMergePanel();
+    playPair();
+
+    window.requestAnimationFrame(function () {
+      drawConnector();
+      el.mergeInput.focus({ preventScroll: false });
+    });
+
+    return true;
+  }
+
+  function renderMergePanel() {
+    if (!state.pendingPair) {
+      el.mergePanel.hidden = true;
+      return;
+    }
+
+    const pair = getPairTerms(state.pendingPair);
+    if (!pair) {
+      cancelPair();
+      return;
+    }
+
+    const expected =
+      pair.first.sign * pair.first.coeff +
+      pair.second.sign * pair.second.coeff;
+
+    state.pendingPair.expected = expected;
+
+    const negative = expected < 0;
+    el.mergePanel.hidden = false;
+    el.mergePanel.classList.toggle("is-negative-merge", negative);
+    el.mergeKicker.textContent = "配对成功 · 两个 x 项";
+    el.mergeSuffix.textContent = "x";
+    el.mergeInput.value = "";
+    el.mergeInput.classList.remove("is-error");
+    el.mergeFeedback.classList.toggle("is-error", negative);
+    el.mergeFeedback.textContent = negative
+      ? "合起来会是负数，先取消配对，把负项搬到另一边。"
+      : "填好后点「合并」。";
+    el.mergeInput.setAttribute("aria-label", "合并后的 x 前面的数");
+  }
+
+  function showMergeError(message) {
+    el.mergeFeedback.textContent = message;
+    el.mergeFeedback.classList.add("is-error");
+    el.mergeInput.classList.remove("is-error");
+    void el.mergeInput.offsetWidth;
+    el.mergeInput.classList.add("is-error");
+    el.mergeInput.select();
+  }
+
+  function submitMerge() {
+    if (!state.pendingPair) return;
+
+    const pair = getPairTerms(state.pendingPair);
+    if (!pair) {
+      cancelPair();
+      return;
+    }
+
+    if (state.pendingPair.expected < 0) {
+      showMergeError("合起来是负数，先取消配对，把负项搬到另一边。");
+      playWrong();
+      return;
+    }
+
+    const raw = el.mergeInput.value.trim().replace(/[−－]/g, "-").replace(/\s+/g, "");
+    if (!/^-?\d+$/.test(raw)) {
+      showMergeError("先填一个整数，再点「合并」。");
+      return;
+    }
+
+    const value = Number(raw);
+    if (value !== state.pendingPair.expected) {
+      showMergeError("还不对，再试一次。");
+      playWrong();
+      return;
+    }
+
+    mergeTerms(pair, value);
+  }
+
+  function mergeTerms(pair, value) {
+    if (!state.pendingPair) return;
+
+    const side = state.pendingPair.side;
+    const first = pair.first;
+    const second = pair.second;
+    const insertAt = Math.min(pair.firstIndex, pair.secondIndex);
+    const merged =
+      first.kind === "x"
+        ? (value === 0 ? null : createXTerm(Math.abs(value), value < 0 ? -1 : 1))
+        : createNumberTerm(value);
+
+    pushHistory();
+
+    const remaining = state[side].filter(function (term) {
+      return term.id !== first.id && term.id !== second.id;
+    });
+    if (merged) remaining.splice(insertAt, 0, merged);
+    state[side] = remaining;
+
+    state.pendingPair = null;
+    state.lastAction = {
+      type: "merge",
+      side,
+      value,
+      kind: first.kind
+    };
+    state.arrivedIds = merged ? [merged.id] : [];
+
+    clearConnector();
+    el.mergePanel.hidden = true;
+    el.mergeInput.value = "";
+    renderEquation();
+    updateUI();
+    playMerge();
+    clearInvite();
+    clearHint();
+
+    const resultText = first.kind === "x"
+      ? (value === 0
+          ? "0"
+          : value === 1
+            ? "x"
+            : value === -1
+              ? "−x"
+              : (value < 0 ? "−" : "") + Math.abs(value) + "x")
+      : String(value);
+
+    showToast("合并成功，现在是 " + resultText + "。");
+  }
+
+  function cancelPair() {
+    if (!state.pendingPair) return;
+
+    state.pendingPair = null;
+    clearConnector();
+    el.mergePanel.hidden = true;
+    el.mergeInput.value = "";
+    el.mergeInput.classList.remove("is-error");
+    el.mergeFeedback.classList.remove("is-error");
+    renderEquation();
+    updateUI();
+    playUndo();
+    showToast("取消配对。");
+  }
+
+  function clearConnector() {
+    if (el.connectorLayer) el.connectorLayer.replaceChildren();
+  }
+
+  function drawConnector() {
+    if (!state.pendingPair || !el.connectorLayer) {
+      clearConnector();
+      return;
+    }
+
+    const pair = getPairTerms(state.pendingPair);
+    if (!pair) {
+      clearConnector();
+      return;
+    }
+
+    const firstEl = findTermElement(pair.first.id);
+    const secondEl = findTermElement(pair.second.id);
+    if (!firstEl || !secondEl) {
+      clearConnector();
+      return;
+    }
+
+    const layerRect = el.connectorLayer.getBoundingClientRect();
+    if (layerRect.width < 2 || layerRect.height < 2) return;
+
+    const firstRect = firstEl.getBoundingClientRect();
+    const secondRect = secondEl.getBoundingClientRect();
+    const x1 = firstRect.left - layerRect.left + firstRect.width / 2;
+    const x2 = secondRect.left - layerRect.left + secondRect.width / 2;
+    const y1 = Math.max(4, firstRect.top - layerRect.top + 3);
+    const y2 = Math.max(4, secondRect.top - layerRect.top + 3);
+
+    let pathData;
+    if (Math.abs(x2 - x1) < 28 && Math.abs(y2 - y1) > 22) {
+      const sideX = Math.min(
+        layerRect.width - 8,
+        Math.max(x1, x2) + Math.min(92, layerRect.width * 0.22)
+      );
+      pathData = "M " + x1 + " " + y1 +
+        " C " + sideX + " " + y1 + ", " + sideX + " " + y2 + ", " + x2 + " " + y2;
+    } else {
+      const arch = Math.max(38, Math.min(84, Math.abs(x2 - x1) * 0.24));
+      const controlY = Math.min(y1, y2) - arch;
+      pathData = "M " + x1 + " " + y1 +
+        " C " + x1 + " " + controlY + ", " + x2 + " " + controlY + ", " + x2 + " " + y2;
+    }
+
+    el.connectorLayer.setAttribute(
+      "viewBox",
+      "0 0 " + layerRect.width + " " + layerRect.height
+    );
+    el.connectorLayer.replaceChildren();
+
+    const namespace = "http://www.w3.org/2000/svg";
+
+    const glow = document.createElementNS(namespace, "path");
+    glow.setAttribute("class", "connector-glow");
+    glow.setAttribute("d", pathData);
+
+    const line = document.createElementNS(namespace, "path");
+    line.setAttribute("class", "connector-line");
+    line.setAttribute("d", pathData);
+
+    const startDot = document.createElementNS(namespace, "circle");
+    startDot.setAttribute("class", "connector-end");
+    startDot.setAttribute("cx", String(x1));
+    startDot.setAttribute("cy", String(y1));
+    startDot.setAttribute("r", "5");
+
+    const endDot = document.createElementNS(namespace, "circle");
+    endDot.setAttribute("class", "connector-dot");
+    endDot.setAttribute("cx", String(x2));
+    endDot.setAttribute("cy", String(y2));
+    endDot.setAttribute("r", "5");
+
+    el.connectorLayer.append(glow, line, startDot, endDot);
+  }
+
+  /* ---------- Sound ---------- */
+
+  function readSoundPreference() {
+    try {
+      return window.localStorage.getItem("equation-mover-sound") !== "off";
+    } catch (error) {
+      return true;
+    }
+  }
+
+  function saveSoundPreference() {
+    try {
+      window.localStorage.setItem("equation-mover-sound", state.soundOn ? "on" : "off");
+    } catch (error) {
+      /* localStorage may be unavailable; sound still works for this session. */
+    }
+  }
+
+  function applySoundButton() {
+    el.soundBtn.classList.toggle("is-muted", !state.soundOn);
+    el.soundBtn.setAttribute("aria-pressed", String(state.soundOn));
+    el.soundBtn.setAttribute("aria-label", state.soundOn ? "关闭音效" : "打开音效");
+    el.soundBtn.title = state.soundOn ? "关闭音效" : "打开音效";
+  }
+
+  function ensureAudio() {
+    if (!state.soundOn) return null;
+    try {
+      if (!audioContext) {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtor) return null;
+        audioContext = new AudioCtor();
+      }
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+      return audioContext;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function tone(frequency, duration, type, volume, delay) {
+    const context = ensureAudio();
+    if (!context) return;
+
+    try {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = context.currentTime + (delay || 0);
+      const length = duration || 0.08;
+      const level = volume || 0.035;
+
+      oscillator.type = type || "sine";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(level, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + length);
+
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + length + 0.03);
+    } catch (error) {
+      /* Ignore audio failures; the lesson should never be blocked. */
+    }
+  }
+
+  function playPickup() {
+    tone(560, 0.055, "sine", 0.025);
+  }
+
+  function playTap() {
+    tone(660, 0.05, "sine", 0.022);
+  }
+
+  function playFlip() {
+    tone(430, 0.07, "triangle", 0.035);
+    tone(640, 0.1, "sine", 0.03, 0.07);
+  }
+
+  function playDivide() {
+    tone(470, 0.07, "triangle", 0.03);
+    tone(350, 0.1, "sine", 0.028, 0.07);
+  }
+
+  function playMerge() {
+    tone(480, 0.07, "sine", 0.028);
+    tone(700, 0.11, "sine", 0.03, 0.075);
+  }
+
+  function playPair() {
+    tone(620, 0.06, "sine", 0.025);
+    tone(820, 0.1, "sine", 0.028, 0.065);
+  }
+
+  function playWrong() {
+    tone(280, 0.11, "triangle", 0.028);
+    tone(220, 0.12, "triangle", 0.022, 0.08);
+  }
+
+  function playUndo() {
+    tone(500, 0.06, "sine", 0.022);
+    tone(380, 0.08, "sine", 0.02, 0.055);
+  }
+
+  function playSuccess() {
+    [523.25, 659.25, 783.99, 1046.5].forEach(function (frequency, index) {
+      tone(frequency, 0.18, "sine", 0.04, index * 0.085);
+    });
+  }
+
+  function toggleSound() {
+    state.soundOn = !state.soundOn;
+    applySoundButton();
+    saveSoundPreference();
+
+    if (state.soundOn) {
+      ensureAudio();
+      tone(620, 0.07, "sine", 0.03);
+      showToast("音效已打开。");
+    } else {
+      showToast("音效已关闭。");
+    }
+  }
+
+  /* ---------- Toast and confetti ---------- */
+
+  function showToast(message, variant) {
+    window.clearTimeout(toastTimer);
+    el.toast.textContent = message;
+    el.toast.className = "toast is-visible" + (variant ? " is-" + variant : "");
+    toastTimer = window.setTimeout(function () {
+      el.toast.classList.remove("is-visible");
+    }, 2900);
+  }
+
+  function hideToast() {
+    window.clearTimeout(toastTimer);
+    el.toast.classList.remove("is-visible");
+  }
+
+  function clearConfetti() {
+    window.clearTimeout(confettiTimer);
+    el.confettiLayer.replaceChildren();
+  }
+
+  function launchConfetti() {
+    if (reduceMotion()) return;
+
+    el.confettiLayer.replaceChildren();
+
+    const rect = el.successCard.getBoundingClientRect();
+    const originX = rect.width ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const originY = rect.height ? rect.top + rect.height * 0.38 : window.innerHeight * 0.45;
+    const colors = ["#ed6a4a", "#f2b640", "#147d72", "#2f79a4", "#7258a8", "#ffd6a3"];
+    const count = 42;
+
+    for (let i = 0; i < count; i += 1) {
+      const piece = document.createElement("span");
+      piece.className = "confetti";
+      piece.style.left = originX + (Math.random() - 0.5) * Math.max(120, rect.width * 0.6) + "px";
+      piece.style.top = originY + "px";
+      piece.style.background = colors[i % colors.length];
+      piece.style.width = 6 + Math.random() * 6 + "px";
+      piece.style.height = 8 + Math.random() * 8 + "px";
+      piece.style.setProperty("--dx", (Math.random() - 0.5) * 560 + "px");
+      piece.style.setProperty("--dy", 150 + Math.random() * 330 + "px");
+      piece.style.setProperty("--rot", (Math.random() - 0.5) * 900 + "deg");
+      piece.style.setProperty("--duration", 1.05 + Math.random() * 0.75 + "s");
+      piece.style.setProperty("--delay", Math.random() * 0.16 + "s");
+      piece.addEventListener("animationend", function () {
+        piece.remove();
+      }, { once: true });
+      el.confettiLayer.appendChild(piece);
+    }
+
+    window.clearTimeout(confettiTimer);
+    confettiTimer = window.setTimeout(function () {
+      el.confettiLayer.replaceChildren();
+    }, 3000);
+  }
+
+  function reduceMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  /* ---------- Dialogs ---------- */
+
+  function maybeShowCompletion() {
+    if (state.completed.size < LEVELS.length || state.completionShown) return;
+
+    state.completionShown = true;
+    window.clearTimeout(completionTimer);
+    completionTimer = window.setTimeout(function () {
+      showCompletionDialog();
+    }, 900);
+  }
+
+  function showCompletionDialog() {
+    el.completeText.textContent =
+      "你完成了全部 " + LEVELS.length + " 关，获得了“解方程之王”称号！";
+
+    if (typeof el.completeDialog.showModal === "function") {
+      if (!el.completeDialog.open) el.completeDialog.showModal();
+    } else {
+      el.completeDialog.setAttribute("open", "");
+    }
+
+    el.completeCloseBtn.focus();
+  }
+
+  function closeCompletionDialog() {
+    if (typeof el.completeDialog.close === "function") {
+      el.completeDialog.close();
+    } else {
+      el.completeDialog.removeAttribute("open");
+    }
+  }
+
+  function openHelp() {
+    clearInvite();
+    clearHint();
+    if (typeof el.helpDialog.showModal === "function") {
+      if (!el.helpDialog.open) el.helpDialog.showModal();
+    } else {
+      el.helpDialog.setAttribute("open", "");
+    }
+    el.closeHelpBtn.focus();
+  }
+
+  function closeHelp() {
+    if (typeof el.helpDialog.close === "function") {
+      el.helpDialog.close();
+    } else {
+      el.helpDialog.removeAttribute("open");
+    }
+    el.helpBtn.focus();
+  }
+
+  /* ---------- Event wiring ---------- */
+
+  function bindEvents() {
+    el.equation.addEventListener("pointerdown", onPointerDown);
+
+    el.equation.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+
+      const coefEl = event.target.closest(".coef-handle");
+      if (coefEl && !state.solved) {
+        event.preventDefault();
+        ensureAudio();
+        performCoefficientDivision(
+          coefEl.dataset.termId,
+          coefEl.dataset.side,
+          otherSide(coefEl.dataset.side),
+          { focus: true }
+        );
+        return;
+      }
+
+      const termEl = event.target.closest(".term");
+      if (!termEl || state.solved) return;
+      event.preventDefault();
+      ensureAudio();
+      performMove(termEl.dataset.termId, termEl.dataset.side, otherSide(termEl.dataset.side), {
+        focus: true
+      });
+    });
+
+    el.hintBtn.addEventListener("click", showHint);
+    el.undoBtn.addEventListener("click", undo);
+    el.resetBtn.addEventListener("click", resetLevel);
+    el.computeBtn.addEventListener("click", compute);
+    el.nextBtn.addEventListener("click", nextLevel);
+    el.soundBtn.addEventListener("click", toggleSound);
+
+    el.mergeConfirmBtn.addEventListener("click", submitMerge);
+    el.mergeCancelBtn.addEventListener("click", cancelPair);
+    el.mergeInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitMerge();
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        cancelPair();
+      }
+    });
+    el.mergeInput.addEventListener("input", function () {
+      el.mergeInput.classList.remove("is-error");
+      el.mergeFeedback.classList.remove("is-error");
+    });
+
+    el.brandTitle.addEventListener("click", function () {
+      titleClickCount += 1;
+      window.clearTimeout(titleClickTimer);
+      titleClickTimer = window.setTimeout(function () {
+        titleClickCount = 0;
+      }, 2500);
+
+      if (titleClickCount >= 5) {
+        titleClickCount = 0;
+        window.clearTimeout(titleClickTimer);
+        toggleDevMode();
+      }
+    });
+
+    el.helpBtn.addEventListener("click", openHelp);
+    el.closeHelpBtn.addEventListener("click", closeHelp);
+    el.helpStartBtn.addEventListener("click", function () {
+      closeHelp();
+      showHint();
+    });
+
+    el.helpDialog.addEventListener("click", function (event) {
+      if (event.target === el.helpDialog) closeHelp();
+    });
+
+    el.completeCloseBtn.addEventListener("click", closeCompletionDialog);
+    el.completeRestartBtn.addEventListener("click", function () {
+      closeCompletionDialog();
+      loadLevel(0);
+    });
+    el.completeDialog.addEventListener("click", function (event) {
+      if (event.target === el.completeDialog) closeCompletionDialog();
+    });
+
+    el.levelDots.addEventListener("click", function (event) {
+      const button = event.target.closest(".level-dot");
+      if (!button) return;
+      if (button.classList.contains("is-locked")) {
+        showToast("先完成前面的关卡，才能解锁这一关。");
+        return;
+      }
+      const index = Number(button.dataset.level);
+      if (index === state.levelIndex) {
+        showToast("已经是这一关啦。");
+        return;
+      }
+      loadLevel(index);
+      playTap();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undo();
+        return;
+      }
+      if (event.key === "Escape" && drag) {
+        event.preventDefault();
+        finishDrag(true);
+        updateUI();
+        return;
+      }
+      if (event.key === "Escape" && state.pendingPair) {
+        event.preventDefault();
+        cancelPair();
+      }
+    });
+
+    document.addEventListener("contextmenu", function (event) {
+      if (event.target.closest(".term, .coef-handle")) event.preventDefault();
+    });
+
+    window.addEventListener("blur", function () {
+      if (drag) {
+        finishDrag(true);
+        updateUI();
+      }
+    });
+
+    window.addEventListener("resize", function () {
+      if (drag) {
+        finishDrag(true);
+        updateUI();
+      }
+      if (state.pendingPair) window.requestAnimationFrame(drawConnector);
+    });
+
+    window.addEventListener("scroll", function () {
+      if (state.pendingPair) window.requestAnimationFrame(drawConnector);
+    }, { passive: true });
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden && drag) {
+        finishDrag(true);
+        updateUI();
+      }
+    });
+  }
+
+  function init() {
+    state.soundOn = readSoundPreference();
+    applySoundButton();
+    initDots();
+    bindEvents();
+    loadLevel(0);
+  }
+
+  init();
+
+  if (new URLSearchParams(window.location.search).has("debug")) {
+    window.__equationMover = {
+      getState: function () {
+        return {
+          levelIndex: state.levelIndex,
+          left: cloneTerms(state.left),
+          right: cloneTerms(state.right),
+          original: {
+            left: cloneTerms(state.original.left),
+            right: cloneTerms(state.original.right)
+          },
+          divisor: cloneDivisor(state.divisor),
+          manualCombine: state.manualCombine,
+          preface: state.preface,
+          devMode: state.devMode,
+          unlockedUpTo: getUnlockedUpTo(),
+          completionShown: state.completionShown,
+          pendingPair: state.pendingPair
+            ? {
+                side: state.pendingPair.side,
+                ids: state.pendingPair.ids.slice(),
+                kind: state.pendingPair.kind,
+                expected: state.pendingPair.expected
+              }
+            : null,
+          solved: state.solved,
+          solution: state.solution,
+          historyLength: state.history.length,
+          moves: state.moves,
+          completed: Array.from(state.completed),
+          suggestion: getSuggestedAction(),
+          suggestedPair: getSuggestedPair(),
+          canSimplify: canSimplify(),
+          coefficientTarget: getCoefficientTarget()
+        };
+      },
+      move: performMove,
+      divideCoefficient: performCoefficientDivision,
+      pairTerms: beginPair,
+      submitMerge: submitMerge,
+      cancelPair: cancelPair,
+      toggleDevMode: toggleDevMode,
+      compute: compute,
+      undo: undo,
+      reset: resetLevel,
+      loadLevel: loadLevel
+    };
+  }
+})();
+
+  </script>
+</body>
+</html>
